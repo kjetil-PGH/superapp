@@ -565,9 +565,17 @@ body{background:#E5E5E0;min-height:100vh;display:flex;align-items:flex-start;jus
 <!-- BUDSJETT -->
 <div class="sc" id="budget">
 <div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
-<div class="tnav"><div style="width:60px"></div><div class="tnav-title">Budsjett</div><div style="width:60px;text-align:right;font-size:13px;font-weight:500;color:var(--accent)">Mars 2026</div></div>
-<div class="scroll"><div style="padding-bottom:100px">
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 18px 6px">
+<div class="tnav"><div style="width:60px"></div><div class="tnav-title">Budsjett</div><div style="width:60px"></div></div>
+
+<!-- PERIODE-TOGGLER -->
+<div style="display:flex;gap:0;margin:0 18px 10px;background:var(--sf3);border-radius:10px;padding:3px;flex-shrink:0">
+  <button id="tog-mnd" onclick="setBudPeriod('mnd')" style="flex:1;padding:7px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--sf);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)">Måned</button>
+  <button id="tog-aar" onclick="setBudPeriod('aar')" style="flex:1;padding:7px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--ink3)">År</button>
+</div>
+
+<!-- MÅNEDS-VIEW -->
+<div id="bud-mnd-view" style="overflow-y:auto;flex:1"><div style="padding-bottom:100px">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px 6px">
 <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Inn</div><div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">34 200</div></div>
 <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Ut</div><div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">26 800</div></div>
 <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Igjen</div><div style="font-size:20px;font-weight:700;color:var(--ok);letter-spacing:-.5px">7 400</div></div>
@@ -590,7 +598,6 @@ body{background:#E5E5E0;min-height:100vh;display:flex;align-items:flex-start;jus
 <div class="brow" onclick="openBudGen('Hobby og fritid','1 240 kr','20','ok',budTxHobby)"><div class="bcat">Hobby/fritid</div><div class="btrack"><div class="bfill f-ok" style="width:20%"></div></div><div class="bval">1 240</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 <div class="brow" onclick="go('bud-vipps')"><div class="bcat">Vipps/Ukjent</div><div class="btrack"><div class="bfill f-warn" style="width:52%"></div></div><div class="bval">3 163</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
 </div>
-
 <div class="sh"><span class="sh-t">Innsikt denne måneden</span></div>
 <div class="card">
 <div class="crow"><div><div class="cl">Restaurant</div><div style="font-size:12px;color:var(--err);margin-top:2px">+52% over normalt for din profil</div></div><div class="cv r">2 367 kr</div></div>
@@ -598,6 +605,182 @@ body{background:#E5E5E0;min-height:100vh;display:flex;align-items:flex-start;jus
 <div class="crow"><div><div class="cl">Vipps/Ukjent</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Uklassifisert</div></div><div class="cv">3 163 kr</div></div>
 </div>
 </div></div>
+
+<!-- ÅRSVISNING -->
+<div id="bud-aar-view" style="display:none;overflow-y:auto;flex:1"><div style="padding-bottom:100px">
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px 8px">
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Inn</div><div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.5px">410 400</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Ut</div><div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.5px">321 600</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Spart</div><div style="font-size:17px;font-weight:700;color:var(--ok);letter-spacing:-.5px">88 800</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+</div>
+
+<!-- MÅNEDS-SØYLEDIAGRAM -->
+<div style="margin:0 18px 12px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:18px 18px 14px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+    <span style="font-size:14px;font-weight:600;color:var(--ink)">Forbruk per måned</span>
+    <span style="font-size:12px;color:var(--ink3)">apr '25 – apr '26</span>
+  </div>
+  <svg width="100%" height="80" viewBox="0 0 310 80" preserveAspectRatio="none">
+    <line x1="0" y1="40" x2="310" y2="40" stroke="var(--bd)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="2" y="37" font-size="8" fill="var(--ink4)" font-family="Arial">snitt</text>
+    <rect x="2"   y="42" width="20" height="30" rx="3" fill="var(--accent-lt)"/>
+    <rect x="28"  y="35" width="20" height="37" rx="3" fill="var(--accent-lt)"/>
+    <rect x="54"  y="38" width="20" height="34" rx="3" fill="var(--accent-lt)"/>
+    <rect x="80"  y="32" width="20" height="40" rx="3" fill="var(--accent-lt)"/>
+    <rect x="106" y="36" width="20" height="36" rx="3" fill="var(--accent-lt)"/>
+    <rect x="132" y="44" width="20" height="28" rx="3" fill="var(--accent-lt)"/>
+    <rect x="158" y="39" width="20" height="33" rx="3" fill="var(--accent-lt)"/>
+    <rect x="184" y="18" width="20" height="54" rx="3" fill="#FAEEDA"/>
+    <rect x="210" y="37" width="20" height="35" rx="3" fill="var(--accent-lt)"/>
+    <rect x="236" y="40" width="20" height="32" rx="3" fill="var(--accent-lt)"/>
+    <rect x="262" y="33" width="20" height="39" rx="3" fill="var(--accent-lt)"/>
+    <rect x="288" y="20" width="20" height="52" rx="3" fill="#FAEEDA"/>
+  </svg>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <span style="font-size:9px;color:var(--ink3)">apr</span>
+    <span style="font-size:9px;color:var(--ink3)">jun</span>
+    <span style="font-size:9px;color:var(--ink3)">aug</span>
+    <span style="font-size:9px;color:var(--ink3)">okt</span>
+    <span style="font-size:9px;color:var(--warn)">des ↑</span>
+    <span style="font-size:9px;color:var(--ink3)">feb</span>
+    <span style="font-size:9px;color:var(--warn);font-weight:700">mars ↑</span>
+  </div>
+</div>
+
+<!-- KATEGORIER MED NORMALLINJE -->
+<div style="padding:0 22px 6px;display:flex;align-items:center;gap:16px">
+  <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div><span style="font-size:11px;color:var(--ink3)">Ditt forbruk</span></div>
+  <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:2px;background:var(--ink4);border-radius:1px"></div><span style="font-size:11px;color:var(--ink3)">Normalt</span></div>
+</div>
+
+<div style="margin:6px 18px 10px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Mat og dagligvarer</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">78 000 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:78%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:66%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--warn)">+18% over normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 66 200 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Restaurant</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">28 400 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:86%;height:6px;background:var(--err);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:56%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--err)">+52% over normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 18 600 kr</span>
+    </div>
+    <div style="background:var(--ok-bg);border-radius:var(--r1);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--accent-dk)">Sett mål: 20 000 kr/år?</span>
+      <button onclick="showToast('Mål satt: 20 000 kr/år på restaurant')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Sett mål</button>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Transport</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">22 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:55%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:58%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 24 000 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Helse og apotek</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">7 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:32%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:40%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 9 600 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Klær og sko</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">10 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:40%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:48%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 12 600 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Hobby og fritid</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">14 880 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:45%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:43%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 14 000 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Vipps og ukjent</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">37 956 kr</span>
+    </div>
+    <div style="height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:68%;height:6px;background:#EF9F27;border-radius:3px"></div>
+    </div>
+    <div style="font-size:11px;color:var(--warn)">Ikke kategorisert – kategoriser for bedre innsikt</div>
+  </div>
+</div>
+
+<!-- ÅRETS INNSIKTER -->
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Det vi la merke til</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd);display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--err-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">🍽</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">28 400 kr på restaurant</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">2 367 kr/mnd i snitt. Mye av dette er Wolt og Foodora.</div></div>
+  </div>
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd);display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--warn-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">📦</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">Desember var din dyreste måned</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">34 200 kr ut – 28% over ditt månedlige snitt.</div></div>
+  </div>
+  <div style="padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">💰</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">Du sparte 88 800 kr totalt</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">21,6% av inntekten – over norsk snitt.</div></div>
+  </div>
+</div>
+
+</div></div>
+
 <div class="tabbar">
 <button class="titem" onclick="tab('home')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="7" height="9" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/><rect x="12" y="3" width="7" height="16" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/></svg><span class="titem-lbl">Hjem</span></button>
 <button class="titem on" onclick="tab('budget')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h10M4 16h7" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Budsjett</span></button>
@@ -1851,6 +2034,22 @@ function openBudGen(title,amt,barPct,barColor,txData){
   });
   document.getElementById('bud-gen-list').innerHTML=html;
   go('bud-generisk');
+}
+
+function setBudPeriod(p){
+  const mnd=document.getElementById('bud-mnd-view');
+  const aar=document.getElementById('bud-aar-view');
+  const tm=document.getElementById('tog-mnd');
+  const ta=document.getElementById('tog-aar');
+  if(p==='mnd'){
+    mnd.style.display='';aar.style.display='none';
+    tm.style.background='var(--sf)';tm.style.color='var(--ink)';tm.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
+    ta.style.background='transparent';ta.style.color='var(--ink3)';ta.style.boxShadow='none';
+  } else {
+    mnd.style.display='none';aar.style.display='';
+    ta.style.background='var(--sf)';ta.style.color='var(--ink)';ta.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
+    tm.style.background='transparent';tm.style.color='var(--ink3)';tm.style.boxShadow='none';
+  }
 }
 
 function setGraph(key){
