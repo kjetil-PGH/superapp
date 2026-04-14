@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superapp – Prototype v16 · Epistemisk</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#E5E5E0;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;}
+:root{
+--accent:#0D6E6E;--accent-lt:#E1F5EE;--accent-mid:#1D9E75;--accent-dk:#085041;
+--ink:#0F1923;--ink2:#3D4F5C;--ink3:#7A909E;--ink4:#B8C8D2;
+--sf:#FFFFFF;--sf2:#F5F7F8;--sf3:#EDF0F2;
+--bd:rgba(15,25,35,0.08);--bdm:rgba(15,25,35,0.14);
+--ok:#0F6E56;--ok-bg:#E1F5EE;
+--warn:#854F0B;--warn-bg:#FAEEDA;
+--err:#A32D2D;--err-bg:#FCEBEB;
+--r1:10px;--r2:16px;--r3:22px;--r4:28px;
+}
+.phone{max-width:390px;width:100%;background:var(--sf2);border-radius:52px;overflow:hidden;border:10px solid #1A1A1A;-webkit-font-smoothing:antialiased;position:relative;height:780px;display:flex;flex-direction:column;}
+.sc{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.sc.on{display:flex;}
+.scroll{overflow-y:auto;flex:1;}
+.scroll::-webkit-scrollbar{display:none;}
+.sbar{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;}
+.sbar-t{font-size:15px;font-weight:600;color:var(--ink);}
+.sbar-i{font-size:12px;color:var(--ink3);}
+.tnav{display:flex;align-items:center;justify-content:space-between;padding:6px 22px 10px;flex-shrink:0;}
+.tnav-back{font-size:15px;font-weight:500;color:var(--accent);cursor:pointer;}
+.tnav-title{font-size:17px;font-weight:600;color:var(--ink);text-align:center;}
+.gear-btn{width:42px;height:42px;border-radius:50%;background:var(--sf);border:.5px solid var(--bdm);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.home-nav{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 24px 14px;}
+.home-date{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.home-greet{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.5px;line-height:1.1;}
+
+/* BESLUTNINGSDASHBOARD */
+.dash{margin:0 18px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.dash-card{background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:14px 16px;}
+.dash-card.accent{background:var(--accent);border-color:transparent;cursor:pointer;}
+.dash-lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.dash-card.accent .dash-lbl{color:rgba(255,255,255,.55);}
+.dash-amt{font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.5px;line-height:1.1;}
+.dash-card.accent .dash-amt{color:#fff;}
+.dash-sub{font-size:11px;color:var(--ok);margin-top:3px;}
+.dash-card.accent .dash-sub{color:rgba(255,255,255,.65);}
+
+/* KONTEKSTSTRIPE */
+.ctx-strip{display:flex;border-top:.5px solid var(--bd);border-bottom:.5px solid var(--bd);background:var(--sf);margin-bottom:2px;}
+.ctx-item{flex:1;padding:11px 0;text-align:center;}
+.ctx-item:not(:last-child){border-right:.5px solid var(--bd);}
+.ctx-v{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.3px;}
+.ctx-l{font-size:10px;font-weight:600;color:var(--ink3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
+.ctx-v.g{color:var(--ok);}
+.ctx-v.o{color:var(--warn);}
+
+/* SEKSJON */
+.sec{padding:18px 22px 0;}
+.sec-lbl{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 8px;}
+.sh-t{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+
+/* PÅGÅENDE */
+.spill{display:flex;align-items:center;gap:11px;background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:12px 16px;cursor:pointer;margin-bottom:8px;}
+.spill:active{background:var(--sf2);}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-ok{background:var(--accent-mid);}
+.dot-warn{background:#E6A93A;}
+.spill-body{flex:1;}
+.spill-t{font-size:14px;font-weight:500;color:var(--ink);}
+.spill-s{font-size:12px;color:var(--ink3);margin-top:1px;}
+
+/* EPISTEMISK BADGES */
+.ep-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
+.ep{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;}
+.ep-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.ep-eff-h{background:var(--ok-bg);color:var(--ok);}.ep-eff-h .ep-dot{background:var(--ok);}
+.ep-eff-m{background:var(--warn-bg);color:var(--warn);}.ep-eff-m .ep-dot{background:var(--warn);}
+.ep-low{background:var(--ok-bg);color:var(--ok);}.ep-low .ep-dot{background:var(--ok);}
+.ep-med{background:var(--warn-bg);color:var(--warn);}.ep-med .ep-dot{background:var(--warn);}
+.ep-data-s{background:#E6F1FB;color:#185FA5;}.ep-data-s .ep-dot{background:#185FA5;}
+.ep-data-m{background:var(--warn-bg);color:var(--warn);}.ep-data-m .ep-dot{background:var(--warn);}
+.ep-data-u{background:#F1EFE8;color:#5F5E5A;}.ep-data-u .ep-dot{background:#5F5E5A;}
+
+/* DATAKILDE TAGS */
+.src-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;}
+.src-auto{background:var(--ok-bg);color:var(--ok);}
+.src-dok{background:#E6F1FB;color:#185FA5;}
+.src-antatt{background:#F1EFE8;color:#5F5E5A;}
+.chat-src{font-size:11px;color:var(--ink3);margin-top:6px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+
+/* ANBEFALINGSKORT */
+.rec{background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden;cursor:pointer;margin-bottom:10px;}
+.rec:active{opacity:.93;}
+.rec-body{padding:16px 18px 12px;}
+.rec-cat{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;}
+.rc1{color:var(--err);}.rc2{color:var(--warn);}.rc3{color:var(--accent);}
+.rec-save{font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:3px;}
+.rec-save-sub{font-size:12px;font-weight:400;color:var(--ink3);}
+.rec-desc{font-size:13px;color:var(--ink2);margin-bottom:10px;line-height:1.5;}
+.rec-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:.5px solid var(--bd);background:var(--sf2);}
+.rec-cta{font-size:13px;font-weight:600;color:var(--accent);}
+.rec-skip{font-size:11px;color:var(--ink3);cursor:pointer;}
+
+/* CARD */
+.card{margin:0 18px 8px;background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);overflow:hidden;}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:.5px solid var(--bd);}
+.crow:last-child{border-bottom:none;}
+.crow.tap{cursor:pointer;}
+.crow.tap:active{background:var(--sf2);}
+.cl{font-size:14px;color:var(--ink2);}
+.cv{font-size:14px;font-weight:600;color:var(--ink);}
+.cv.g{color:var(--ok);}.cv.r{color:var(--err);}.cv.o{color:var(--warn);}
+
+/* CHOICE */
+.choice{margin:0 18px 8px;background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:16px 18px;cursor:pointer;}
+.choice:active{background:var(--sf2);}
+.choice.feat{border:1.5px solid var(--accent);}
+.ch-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.ch-title{font-size:15px;font-weight:600;color:var(--ink);}
+.ch-badge{font-size:10px;font-weight:700;background:var(--accent);color:#fff;padding:2px 8px;border-radius:6px;}
+.ch-desc{font-size:13px;color:var(--ink2);line-height:1.45;}
+.ch-save{font-size:13px;font-weight:600;color:var(--accent);margin-top:5px;}
+
+/* BUTTONS */
+.btn{display:block;width:calc(100% - 36px);margin:0 18px 8px;padding:15px;border-radius:var(--r2);border:none;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;}
+.btn-p{background:var(--accent);color:#fff;}
+.btn-s{background:var(--sf);color:var(--ink);border:.5px solid var(--bdm);}
+.note{padding:0 18px 14px;font-size:12px;color:var(--ink3);text-align:center;line-height:1.6;}
+
+/* DHERO */
+.dhero{margin:10px 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px;}
+.deye{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.damt{font-size:36px;font-weight:700;color:var(--ink);letter-spacing:-1.2px;line-height:1;margin-bottom:4px;}
+.dsub{font-size:13px;color:var(--ink3);}
+
+/* INFO BOX */
+.info-box{margin:0 18px 10px;padding:13px 16px;border-radius:var(--r2);}
+.ib-g{background:var(--ok-bg);}.ib-o{background:var(--warn-bg);}.ib-r{background:var(--err-bg);}
+.ib-t{font-size:14px;font-weight:600;margin-bottom:4px;}
+.ibt-g{color:var(--accent-dk);}.ibt-o{color:var(--warn);}.ibt-r{color:var(--err);}
+.ib-s{font-size:13px;line-height:1.6;}
+.ibs-g{color:var(--accent-dk);}.ibs-o{color:var(--warn);}.ibs-r{color:var(--err);}
+
+/* PROP CARD */
+.prop-card{margin:8px 18px;background:#1A3A5C;border-radius:var(--r3);overflow:hidden;cursor:pointer;}
+.prop-img{height:80px;background:linear-gradient(135deg,#1A3A5C,#2D5F8A);position:relative;display:flex;align-items:flex-end;padding:11px 16px;}
+.prop-ov{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 20%,rgba(26,58,92,.9));}
+.prop-lbl{position:relative;z-index:1;font-size:12px;font-weight:600;color:rgba(255,255,255,.85);}
+.prop-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:11px 16px 6px;border-bottom:.5px solid rgba(255,255,255,.1);}
+.prop-stat{text-align:center;}
+.prop-stat:not(:last-child){border-right:.5px solid rgba(255,255,255,.1);}
+.psv{font-size:14px;font-weight:700;color:#fff;}
+.psl{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;}
+.prop-ltv{padding:8px 16px 11px;}
+.ltv-bar{height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden;margin-bottom:4px;}
+.ltv-fill{height:4px;background:#34C759;border-radius:2px;}
+.ltv-lbls{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.45);}
+
+/* FORMUE CARD */
+.fc{margin:0 18px 8px;background:var(--accent);border-radius:var(--r3);overflow:hidden;cursor:pointer;}
+.fc:active{opacity:.93;}
+.fc-body{padding:20px 20px 14px;}
+.fc-eye{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+.fc-amt{font-size:36px;font-weight:700;color:#fff;letter-spacing:-1.2px;line-height:1;margin-bottom:4px;}
+.fc-trend{font-size:12px;font-weight:500;color:rgba(255,255,255,.7);margin-bottom:12px;}
+.fc-bar{height:4px;background:rgba(255,255,255,.18);border-radius:2px;overflow:hidden;margin-bottom:5px;}
+.fc-fill{height:4px;background:rgba(255,255,255,.85);border-radius:2px;}
+.fc-leg{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.5);}
+.fc-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:.5px solid rgba(255,255,255,.12);}
+.fc-stat{padding:12px 0 14px;text-align:center;}
+.fc-stat:not(:last-child){border-right:.5px solid rgba(255,255,255,.12);}
+.fcsv{font-size:14px;font-weight:700;color:#fff;}
+.fcsl{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;}
+
+/* BUDSJETT BAR */
+.brow{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:.5px solid var(--bd);cursor:pointer;}
+.brow:last-child{border-bottom:none;}
+.brow:active{background:var(--sf2);}
+.bcat{font-size:13px;font-weight:500;color:var(--ink);width:100px;flex-shrink:0;}
+.btrack{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden;}
+.bfill{height:4px;border-radius:2px;}
+.f-ok{background:var(--accent-mid);}.f-warn{background:#EF9F27;}.f-bad{background:#E24B4A;}
+.bval{font-size:13px;font-weight:600;color:var(--ink);width:54px;text-align:right;flex-shrink:0;}
+
+/* ABONNEMENT */
+.ab-item{overflow:hidden;}
+.ab-row{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;border-bottom:.5px solid var(--bd);}
+.ab-row:last-child{border-bottom:none;}
+.ab-row:active{background:var(--sf2);}
+.ab-logo{width:36px;height:36px;border-radius:9px;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink3);flex-shrink:0;}
+.ab-name{font-size:14px;font-weight:500;color:var(--ink);}
+.ab-sub{font-size:12px;color:var(--ink3);margin-top:1px;}
+.ab-price{font-size:14px;font-weight:600;color:var(--ink);text-align:right;}
+.ab-badge{font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;display:inline-block;margin-top:2px;}
+.b-r{background:var(--err-bg);color:var(--err);}
+.b-o{background:var(--warn-bg);color:var(--warn);}
+.b-p{background:#EDE7F6;color:#6B21A8;}
+.ab-panel{display:none;background:var(--sf2);border-top:.5px solid var(--bd);padding:13px 18px;}
+.ab-panel-t{font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:10px;}
+.ab-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ab-btn-p{padding:10px;border-radius:var(--r1);border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.ab-btn-s{padding:10px;border-radius:var(--r1);border:.5px solid var(--bdm);background:transparent;color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+
+/* FILTER */
+.ftabs{display:flex;gap:6px;padding:0 18px;margin-bottom:12px;flex-wrap:wrap;}
+.ftab{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-family:inherit;}
+.ftab.on{background:var(--accent);color:#fff;}
+.ftab.off{background:var(--sf);color:var(--ink3);border:.5px solid var(--bd);}
+
+/* TOGGLE */
+.tgl{width:51px;height:31px;border-radius:16px;background:#E5E5EA;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.tgl.on{background:var(--accent-mid);}
+.tk{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;pointer-events:none;}
+.tgl.on .tk{left:22px;}
+
+/* EI ROW */
+.ei-row{display:flex;align-items:center;padding:13px 18px;border-bottom:.5px solid var(--bd);gap:12px;cursor:pointer;}
+.ei-row:last-child{border-bottom:none;}
+.ei-row:active{background:var(--sf2);}
+.ei-ic{width:40px;height:40px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ei-name{font-size:14px;font-weight:600;color:var(--ink);}
+.ei-sub{font-size:12px;color:var(--ink3);margin-top:1px;}
+.ei-val{font-size:15px;font-weight:700;color:var(--ink);}
+.ei-tr{font-size:11px;font-weight:600;margin-top:2px;}
+
+/* INNSTILLINGER */
+.sgr{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:.5px solid var(--bd);}
+.sgr:last-child{border-bottom:none;}
+.sgl{font-size:15px;color:var(--ink);}
+.sgs{font-size:12px;color:var(--ink3);margin-top:2px;}
+.sgv{font-size:14px;color:var(--ink3);}
+.sgv.g{color:var(--ok);}
+.sgv.o{color:var(--warn);}
+
+/* PSTEP */
+.pstep{display:flex;align-items:flex-start;gap:12px;padding:9px 0;}
+.pstep-c{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.ps-done{background:var(--accent-mid);color:#fff;}
+.ps-act{background:var(--accent);color:#fff;}
+.ps-pend{background:var(--sf3);color:var(--ink3);border:.5px solid var(--bd);}
+.pstep-t{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.pstep-s{font-size:13px;color:var(--ink3);}
+
+/* BIL CARD */
+.bil-card{background:#1C2B35;border-radius:var(--r3);overflow:hidden;cursor:pointer;}
+.bil-top{height:64px;background:#243545;display:flex;align-items:center;justify-content:center;}
+.bil-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:12px 16px 14px;}
+.bil-stat{text-align:center;}
+.bil-stat:not(:last-child){border-right:.5px solid rgba(255,255,255,.1);}
+.bsv{font-size:14px;font-weight:700;color:#fff;}
+.bsl{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;}
+
+/* GOAL */
+.goal-card{margin:0 18px 10px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden;}
+.goal-body{padding:18px 18px 14px;}
+.goal-icon-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.goal-ic{width:42px;height:42px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.goal-name{font-size:16px;font-weight:700;color:var(--ink);}
+.goal-sub{font-size:12px;color:var(--ink3);margin-top:2px;}
+.goal-amt{font-size:34px;font-weight:700;color:var(--ink);letter-spacing:-1px;margin-bottom:4px;}
+.goal-prog{height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.goal-prog-fill{height:5px;border-radius:3px;background:var(--accent);}
+.goal-lbls{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);}
+.goal-footer{border-top:.5px solid var(--bd);display:grid;grid-template-columns:1fr 1fr;}
+.gf{padding:12px 0 14px;text-align:center;}
+.gf:first-child{border-right:.5px solid var(--bd);}
+.gfv{font-size:18px;font-weight:700;color:var(--ink);}
+.gfl{font-size:11px;color:var(--ink3);margin-top:2px;}
+
+/* UPLOAD */
+.upload{margin:0 18px 10px;border:1.5px dashed var(--bdm);border-radius:var(--r2);padding:22px;text-align:center;cursor:pointer;background:var(--sf);}
+.upload:active{background:var(--sf2);}
+.uz-ic{width:36px;height:36px;border-radius:9px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.uz-t{font-size:14px;font-weight:600;color:var(--accent);}
+.uz-s{font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.5;}
+
+/* POLISE */
+.pol{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:.5px solid var(--bd);}
+.pol:last-child{border-bottom:none;}
+.pol-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pol-name{font-size:14px;font-weight:500;color:var(--ink);}
+.pol-st{font-size:12px;font-weight:600;margin-left:auto;}
+
+/* QUIZ */
+.quiz-card{margin:0 18px 10px;background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:16px 18px;}
+.quiz-q{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:12px;line-height:1.4;}
+.qopts{display:flex;flex-direction:column;gap:8px;}
+.qopt{padding:12px 14px;border-radius:var(--r1);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:10px;font-family:inherit;text-align:left;}
+.qopt.sel{border-color:var(--accent);background:var(--ok-bg);color:var(--accent-dk);font-weight:600;}
+.qic{font-size:16px;flex-shrink:0;width:22px;text-align:center;}
+
+/* CHAT */
+.chat-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px;}
+.chat-msgs::-webkit-scrollbar{display:none;}
+.msg-a{align-self:flex-start;max-width:90%;}
+.msg-u{align-self:flex-end;max-width:90%;}
+.bbl-a{background:var(--sf);border:.5px solid var(--bd);border-radius:18px 18px 18px 4px;padding:12px 15px;font-size:14px;color:var(--ink);line-height:1.55;}
+.bbl-u{background:var(--accent);border-radius:18px 18px 4px 18px;padding:12px 15px;font-size:14px;color:#fff;line-height:1.55;}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.chip{font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;background:var(--ok-bg);color:var(--accent-dk);border:none;cursor:pointer;font-family:inherit;line-height:1.3;}
+.chat-iw{padding:10px 18px 18px;border-top:.5px solid var(--bd);background:var(--sf);flex-shrink:0;}
+.chat-ir{display:flex;align-items:center;gap:8px;background:var(--sf2);border-radius:24px;padding:8px 8px 8px 16px;}
+.chat-inp{flex:1;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;font-family:inherit;}
+.chat-send{width:30px;height:30px;border-radius:50%;border:none;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* TABBAR */
+.tabbar{height:84px;background:var(--sf);border-top:.5px solid var(--bd);display:flex;padding:8px 0 0;flex-shrink:0;}
+.titem{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:none;background:transparent;font-family:inherit;}
+.titem-lbl{font-size:10px;font-weight:500;color:var(--ink3);}
+.titem.on .titem-lbl{color:var(--accent);}
+
+/* MODAL */
+.mbg{position:absolute;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;z-index:100;border-radius:44px;}
+.mbg.show{display:flex;}
+.msh{background:var(--sf);border-radius:var(--r3) var(--r3) 0 0;width:100%;padding:20px 20px 36px;max-height:88vh;overflow-y:auto;}
+.mhandle{width:40px;height:4px;border-radius:2px;background:var(--bdm);margin:0 auto 18px;}
+.mt{font-size:17px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:20px;}
+.gt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.gt-item{background:var(--sf2);border-radius:var(--r1);padding:14px;text-align:center;cursor:pointer;border:1.5px solid transparent;}
+.gt-item.sel{border-color:var(--accent);background:var(--ok-bg);}
+.gt-ic{font-size:20px;margin-bottom:6px;}
+.gt-nm{font-size:13px;font-weight:600;color:var(--ink);}
+.mi{width:100%;padding:12px 14px;border-radius:var(--r1);border:1.5px solid var(--bdm);background:var(--sf2);color:var(--ink);font-size:15px;font-family:inherit;outline:none;margin-bottom:10px;}
+.mi:focus{border-color:var(--accent);}
+
+/* TOAST */
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(15,25,35,.9);color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;font-weight:500;display:none;z-index:999;white-space:nowrap;max-width:86%;text-align:center;}
+.ver{position:fixed;bottom:16px;right:16px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:.05em;z-index:1000;}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+
+<!-- HJEM -->
+<div class="sc on" id="home">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="home-nav">
+  <div><div class="home-date">Mars 2026</div><div class="home-greet">God morgen</div></div>
+  <button class="gear-btn" onclick="go('settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</div>
+<div class="scroll"><div style="padding-bottom:100px">
+
+<!-- 1. PROGRESJONSKORT MED GRAF -->
+<div style="margin:0 18px 12px;background:linear-gradient(135deg,var(--accent-dk),var(--accent));border-radius:var(--r3);padding:22px 22px 0;overflow:hidden;">
+  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Du har spart</div>
+  <div style="font-size:42px;font-weight:700;color:#fff;letter-spacing:-1.8px;line-height:1">3 217 kr</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:4px;margin-bottom:16px">siden du startet · januar 2026</div>
+
+  <!-- Graf-tabs: hvit bakgrunn + border = tydelig på mørk bakgrunn -->
+  <div style="display:flex;gap:4px;margin-bottom:14px;" id="prog-tabs">
+    <button id="gt-spart" onclick="setGraph('spart')" style="flex:1;padding:7px 6px;border-radius:8px;border:1px solid #fff;font-size:12px;font-weight:600;cursor:pointer;color:var(--accent-dk);background:#fff;font-family:inherit;">Spart</button>
+    <button id="gt-igjen" onclick="setGraph('igjen')" style="flex:1;padding:7px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.65);background:transparent;font-family:inherit;">Til overs</button>
+    <button id="gt-pot" onclick="setGraph('pot')" style="flex:1;padding:7px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.65);background:transparent;font-family:inherit;">Potensial</button>
+  </div>
+
+  <!-- SVG GRAF -->
+  <div style="height:60px;position:relative;">
+    <svg width="100%" height="60" viewBox="0 0 330 60" preserveAspectRatio="none">
+      <text x="2" y="10" font-size="8" fill="rgba(255,255,255,.35)">kr</text>
+      <g id="g-spart">
+        <polygon points="0,58 55,54 110,47 165,39 220,28 275,14 330,6 330,60 0,60" fill="rgba(255,255,255,.12)"/>
+        <polyline points="0,58 55,54 110,47 165,39 220,28 275,14 330,6" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="330" cy="6" r="4" fill="#fff"/>
+        <text x="300" y="4" font-size="9" fill="rgba(255,255,255,.75)" text-anchor="end">3 217 kr</text>
+      </g>
+      <g id="g-igjen" style="display:none">
+        <polygon points="0,36 55,34 110,38 165,28 220,20 275,16 330,10 330,60 0,60" fill="rgba(255,255,255,.12)"/>
+        <polyline points="0,36 55,34 110,38 165,28 220,20 275,16 330,10" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="330" cy="10" r="4" fill="#fff"/>
+        <text x="300" y="8" font-size="9" fill="rgba(255,255,255,.75)" text-anchor="end">7 400 kr</text>
+      </g>
+      <g id="g-pot" style="display:none">
+        <polygon points="0,56 55,50 110,40 165,28 220,16 275,7 330,2 330,60 0,60" fill="rgba(255,255,255,.06)"/>
+        <polyline points="0,56 55,50 110,40 165,28 220,16 275,7 330,2" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="5,3" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline points="0,58 55,54 110,47 165,39" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="165" cy="39" r="3.5" fill="#fff"/>
+        <text x="172" y="37" font-size="9" fill="rgba(255,255,255,.8)">nå</text>
+        <text x="328" y="4" font-size="9" fill="rgba(255,255,255,.4)" text-anchor="end">42 048 kr/år</text>
+      </g>
+    </svg>
+  </div>
+  <div style="display:flex;justify-content:space-between;padding:5px 0 14px;">
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">jan</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">feb</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">mar</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">apr</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">mai</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.4)">jun</span>
+    <span style="font-size:10px;color:rgba(255,255,255,.85);font-weight:600">nå</span>
+  </div>
+</div>
+
+<!-- 2. NÅ-SITUASJON (4-KORT GRID) -->
+<div style="margin:0 18px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+  <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 14px;cursor:pointer" onclick="go('formue')">
+    <div style="font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Netto formue</div>
+    <div style="font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.3px;line-height:1.15">3 560 000 kr</div>
+    <div style="font-size:11px;color:var(--ok);margin-top:3px">↑ 340 000 kr i år</div>
+  </div>
+  <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 14px;">
+    <div style="font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Til overs</div>
+    <div style="font-size:19px;font-weight:700;color:var(--ok);letter-spacing:-.4px;line-height:1.15">7 400 kr</div>
+    <div style="font-size:11px;color:var(--ok);margin-top:3px">+840 kr vs forrige mnd</div>
+  </div>
+  <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 14px;">
+    <div style="font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Innbetalt</div>
+    <div style="font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.4px;line-height:1.15">34 200 kr</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:3px">denne måneden</div>
+  </div>
+  <div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 14px;">
+    <div style="font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px">Du kan spare</div>
+    <div style="font-size:19px;font-weight:700;color:var(--warn);letter-spacing:-.4px;line-height:1.15">3 504 kr/mnd</div>
+    <div style="font-size:11px;color:var(--warn);margin-top:3px">hvis du handler nå</div>
+  </div>
+</div>
+
+<!-- PÅGÅENDE PILLS -->
+<div style="display:flex;gap:8px;padding:0 18px;margin-bottom:16px;flex-wrap:wrap;">
+
+  <div style="display:inline-flex;align-items:center;gap:6px;background:var(--sf);border-radius:20px;border:.5px solid var(--bd);padding:7px 13px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink);" onclick="go('sparemaal')"><div style="width:7px;height:7px;border-radius:50%;background:var(--accent-mid);flex-shrink:0;"></div>Japan-tur 68%</div>
+</div>
+
+<!-- 3. GJØR DETTE (ÉN TYDELIG HANDLING) -->
+<div style="padding:0 22px 10px;display:flex;align-items:center;justify-content:space-between;">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;">Gjør dette</span>
+</div>
+
+<!-- Dynamisk top-anbefaling – demo: bytter mellom ett og to lån -->
+<div id="top-rec-ab" style="margin:0 18px 12px;background:var(--sf);border-radius:var(--r3);border:1.5px solid var(--accent);overflow:hidden;cursor:pointer;" onclick="go('lan')">
+  <div style="background:var(--accent);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.07em;text-transform:uppercase;">Viktigst nå</span>
+    <span style="font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;">+2 050 kr/mnd</span>
+  </div>
+  <div style="padding:16px 18px 14px;">
+    <div style="font-size:11px;font-weight:600;color:var(--err);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Lån og gjeld</div>
+    <div style="font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:3px;">+2 050 <span style="font-size:14px;font-weight:400;color:var(--ink3);">kr/mnd</span></div>
+    <div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:10px;">Forbrukslånet ditt til 18,9% kan refinansieres til 4,6% ved å samle det i boliglånet.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+      <div class="ep ep-eff-h"><div class="ep-dot"></div>Stor effekt</div>
+      <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div>
+    </div>
+    <button style="display:block;width:100%;padding:14px;border-radius:var(--r2);border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;" onclick="event.stopPropagation();go('lan')">Se hva du kan gjøre</button>
+    <span style="display:block;text-align:center;font-size:12px;color:var(--ink3);margin-top:8px;cursor:pointer;" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span>
+  </div>
+</div>
+
+<!-- Bruker med KUN boliglån – skjult som default, vises via demo-knapp -->
+<div id="top-rec-b" style="margin:0 18px 12px;background:var(--sf);border-radius:var(--r3);border:1.5px solid var(--accent);overflow:hidden;cursor:pointer;display:none;" onclick="go('lan')">
+  <div style="background:var(--accent);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.07em;text-transform:uppercase;">Viktigst nå</span>
+    <span style="font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;">+1 100 kr/mnd</span>
+  </div>
+  <div style="padding:16px 18px 14px;">
+    <div style="font-size:11px;font-weight:600;color:var(--err);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Lån og gjeld</div>
+    <div style="font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:3px;">+1 100 <span style="font-size:14px;font-weight:400;color:var(--ink3);">kr/mnd</span></div>
+    <div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:10px;">Du betaler 5,8% på boliglånet. Markedet tilbyr 4,6% – refinansier og spar 1 100 kr/mnd.</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+      <div class="ep ep-eff-h"><div class="ep-dot"></div>Stor effekt</div>
+      <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div>
+    </div>
+    <button style="display:block;width:100%;padding:14px;border-radius:var(--r2);border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;" onclick="event.stopPropagation();go('lan')">Se refinansieringsalternativer</button>
+    <span style="display:block;text-align:center;font-size:12px;color:var(--ink3);margin-top:8px;cursor:pointer;" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span>
+  </div>
+</div>
+
+<!-- Demo-knapp for å skifte scenario -->
+<div style="padding:0 18px 8px;">
+  <button style="font-size:12px;color:var(--ink3);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:inherit;" onclick="toggleLoanScenario()">Demo: bytt til bruker med bare boliglån</button>
+</div>
+
+<!-- 4. ANDRE TILTAK -->
+<div style="padding:6px 22px 10px;display:flex;align-items:center;justify-content:space-between;">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;">Andre tiltak</span>
+  <span style="font-size:12px;color:var(--ink3);">3 504 kr/mnd totalt</span>
+</div>
+
+<!-- Anbefalinger UTEN "Lån og gjeld" (den er i "Gjør dette") -->
+<div class="sec" style="padding-top:0">
+  <div class="rec" onclick="go('forsikring')">
+    <div class="rec-body">
+      <div class="rec-cat rc1">Forsikring</div>
+      <div class="rec-save">+2 050 <span class="rec-save-sub">kr/mnd</span></div>
+      <div class="rec-desc">Samle alle lån i boliglånet. Forbrukslån til 18,9% er din dyreste kostnad.</div>
+      <div class="ep-row">
+        <div class="ep ep-eff-h"><div class="ep-dot"></div>Høy effekt</div>
+        <div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div>
+        <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div>
+      </div>
+      <div class="chat-src"><span class="src-tag src-auto">Automatisk oppdaget</span><span>Gjeldsregisteret · PSD2</span></div>
+    </div>
+    <div class="rec-foot"><span class="rec-cta">Se hva du kan gjøre →</span><span class="rec-skip" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span></div>
+  </div>
+
+  <div class="rec" onclick="go('forsikring')">
+    <div class="rec-body">
+      <div class="rec-cat rc1">Forsikring · Prioritet 1</div>
+      <div class="rec-save">+290 <span class="rec-save-sub">kr/mnd</span></div>
+      <div class="rec-desc">Dobbeltforsikring på reise. LOfavør gir full dekning – Gjensidige er overflødig.</div>
+      <div class="ep-row">
+        <div class="ep ep-eff-m"><div class="ep-dot"></div>Middels effekt</div>
+        <div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div>
+        <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet via dokument</div>
+      </div>
+      <div class="chat-src"><span class="src-tag src-dok">Bekreftet av dokument</span><span>LOfavør-polise analysert</span></div>
+    </div>
+    <div class="rec-foot"><span class="rec-cta">Si opp nå →</span><span class="rec-skip" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span></div>
+  </div>
+
+  <div class="rec" onclick="go('abonnement')">
+    <div class="rec-body">
+      <div class="rec-cat rc2">Abonnementer · Prioritet 2</div>
+      <div class="rec-save">+568 <span class="rec-save-sub">kr/mnd</span></div>
+      <div class="rec-desc">3 abonnementer krever handling – Netflix ubrukt 7 uker, Storytel muligens glemt.</div>
+      <div class="ep-row">
+        <div class="ep ep-eff-m"><div class="ep-dot"></div>Middels effekt</div>
+        <div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div>
+        <div class="ep ep-data-m"><div class="ep-dot"></div>Antatt basert på mønster</div>
+      </div>
+      <div class="chat-src"><span class="src-tag src-antatt">Antatt basert på mønster</span><span>Ingen aktivitet registrert</span></div>
+    </div>
+    <div class="rec-foot"><span class="rec-cta">Se alle →</span><span class="rec-skip" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span></div>
+  </div>
+
+  <div class="rec" onclick="go('mobil')">
+    <div class="rec-body">
+      <div class="rec-cat rc2">Mobil og internett · Prioritet 2</div>
+      <div class="rec-save">+379 <span class="rec-save-sub">kr/mnd</span></div>
+      <div class="rec-desc">Telenor 20 GB – faktisk forbruk 11 GB/mnd i snitt siste 6 måneder.</div>
+      <div class="ep-row">
+        <div class="ep ep-eff-m"><div class="ep-dot"></div>Middels effekt</div>
+        <div class="ep ep-med"><div class="ep-dot"></div>Noe innsats</div>
+        <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div>
+      </div>
+      <div class="chat-src"><span class="src-tag src-auto">Automatisk oppdaget</span><span>PSD2-transaksjonsanalyse</span></div>
+    </div>
+    <div class="rec-foot"><span class="rec-cta">Se alternativer →</span><span class="rec-skip" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span></div>
+  </div>
+
+  <div class="rec" onclick="go('strom')" style="margin-bottom:0">
+    <div class="rec-body">
+      <div class="rec-cat rc3">Strøm · Prioritet 2</div>
+      <div class="rec-save">+217 <span class="rec-save-sub">kr/mnd</span></div>
+      <div class="rec-desc">Tibber anbefalt basert på ditt faktiske strømforbruk fra Elhub.</div>
+      <div class="ep-row">
+        <div class="ep ep-eff-m"><div class="ep-dot"></div>Middels effekt</div>
+        <div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div>
+        <div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div>
+      </div>
+      <div class="chat-src"><span class="src-tag src-auto">Automatisk oppdaget</span><span>Elhub · Norgespris.no</span></div>
+    </div>
+    <div class="rec-foot"><span class="rec-cta">Bytt til Tibber →</span><span class="rec-skip" onclick="event.stopPropagation();showToast('Påminner om 2 uker')">Ikke nå</span></div>
+  </div>
+</div>
+
+</div></div>
+<div class="tabbar">
+<button class="titem on" onclick="tab('home')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="7" height="9" rx="1.5" stroke="var(--accent)" stroke-width="1.6"/><rect x="12" y="3" width="7" height="16" rx="1.5" stroke="var(--accent)" stroke-width="1.6"/></svg><span class="titem-lbl">Hjem</span></button>
+<button class="titem" onclick="tab('budget')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h10M4 16h7" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Budsjett</span></button>
+<button class="titem" onclick="tab('okonomi')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="var(--ink3)" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Økonomi</span></button>
+<button class="titem" onclick="tab('spor')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8l-4 3V6z" stroke="var(--ink3)" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="titem-lbl">Spør</span></button>
+</div>
+</div>
+
+<!-- BUDSJETT -->
+<div class="sc" id="budget">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div style="width:60px"></div><div class="tnav-title">Budsjett</div><div style="width:60px"></div></div>
+
+<!-- PERIODE-TOGGLER -->
+<div style="display:flex;gap:0;margin:0 18px 10px;background:var(--sf3);border-radius:10px;padding:3px;flex-shrink:0">
+  <button id="tog-mnd" onclick="setBudPeriod('mnd')" style="flex:1;padding:7px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:var(--sf);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)">Måned</button>
+  <button id="tog-aar" onclick="setBudPeriod('aar')" style="flex:1;padding:7px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--ink3)">År</button>
+</div>
+
+<!-- MÅNEDS-VIEW -->
+<div id="bud-mnd-view" style="overflow-y:auto;flex:1"><div style="padding-bottom:100px">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px 6px">
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Inn</div><div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">34 200</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Ut</div><div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">26 800</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Igjen</div><div style="font-size:20px;font-weight:700;color:var(--ok);letter-spacing:-.5px">7 400</div></div>
+</div>
+<div class="sh"><span class="sh-t">Faste utgifter</span></div>
+<div class="card">
+<div class="brow" onclick="go('lan')"><div class="bcat">Boliglån</div><div class="btrack"><div class="bfill f-ok" style="width:88%"></div></div><div class="bval">18 450</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('forsikring')"><div class="bcat">Forsikring</div><div class="btrack"><div class="bfill f-ok" style="width:28%"></div></div><div class="bval">1 379</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('strom')"><div class="bcat">Strøm</div><div class="btrack"><div class="bfill f-ok" style="width:30%"></div></div><div class="bval">1 340</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('abonnement')"><div class="bcat">Abonnementer</div><div class="btrack"><div class="bfill f-warn" style="width:42%"></div></div><div class="bval">2 872</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('mobil')"><div class="bcat">Mobil og nett</div><div class="btrack"><div class="bfill f-ok" style="width:22%"></div></div><div class="bval">1 199</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
+<div class="sh"><span class="sh-t">Variable utgifter</span></div>
+<div class="card">
+<div class="brow" onclick="go('bud-mat')"><div class="bcat">Mat og dagligvarer</div><div class="btrack"><div class="bfill f-warn" style="width:62%"></div></div><div class="bval">6 500</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('bud-rest')"><div class="bcat">Restaurant</div><div class="btrack"><div class="bfill f-bad" style="width:72%"></div></div><div class="bval">2 367</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('bud-transport')"><div class="bcat">Transport</div><div class="btrack"><div class="bfill f-ok" style="width:38%"></div></div><div class="bval">1 890</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="openBudGen('Helse og apotek','640 kr','20','ok',budTxHelse)"><div class="bcat">Helse og apotek</div><div class="btrack"><div class="bfill f-ok" style="width:16%"></div></div><div class="bval">640</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="openBudGen('Klær og sko','890 kr','12','ok',budTxKlar)"><div class="bcat">Klær og sko</div><div class="btrack"><div class="bfill f-ok" style="width:12%"></div></div><div class="bval">890</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="openBudGen('Hobby og fritid','1 240 kr','20','ok',budTxHobby)"><div class="bcat">Hobby/fritid</div><div class="btrack"><div class="bfill f-ok" style="width:20%"></div></div><div class="bval">1 240</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div class="brow" onclick="go('bud-vipps')"><div class="bcat">Vipps/Ukjent</div><div class="btrack"><div class="bfill f-warn" style="width:52%"></div></div><div class="bval">3 163</div><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+</div>
+<div class="sh"><span class="sh-t">Innsikt denne måneden</span></div>
+<div class="card">
+<div class="crow"><div><div class="cl">Restaurant</div><div style="font-size:12px;color:var(--err);margin-top:2px">+52% over normalt for din profil</div></div><div class="cv r">2 367 kr</div></div>
+<div class="crow"><div><div class="cl">Mat og dagligvarer</div><div style="font-size:12px;color:var(--warn);margin-top:2px">+18% over normalt</div></div><div class="cv o">6 500 kr</div></div>
+<div class="crow"><div><div class="cl">Vipps/Ukjent</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Uklassifisert</div></div><div class="cv">3 163 kr</div></div>
+</div>
+</div></div>
+
+<!-- ÅRSVISNING -->
+<div id="bud-aar-view" style="display:none;overflow-y:auto;flex:1"><div style="padding-bottom:100px">
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 18px 8px">
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Inn</div><div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.5px">410 400</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Ut</div><div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.5px">321 600</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+<div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px 12px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Spart</div><div style="font-size:17px;font-weight:700;color:var(--ok);letter-spacing:-.5px">88 800</div><div style="font-size:10px;color:var(--ink3);margin-top:2px">siste 12 mnd</div></div>
+</div>
+
+<!-- MÅNEDS-SØYLEDIAGRAM -->
+<div style="margin:0 18px 12px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:18px 18px 14px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+    <span style="font-size:14px;font-weight:600;color:var(--ink)">Forbruk per måned</span>
+    <span style="font-size:12px;color:var(--ink3)">apr '25 – apr '26</span>
+  </div>
+  <svg width="100%" height="80" viewBox="0 0 310 80" preserveAspectRatio="none">
+    <line x1="0" y1="40" x2="310" y2="40" stroke="var(--bd)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="2" y="37" font-size="8" fill="var(--ink4)" font-family="Arial">snitt</text>
+    <rect x="2"   y="42" width="20" height="30" rx="3" fill="var(--accent-lt)"/>
+    <rect x="28"  y="35" width="20" height="37" rx="3" fill="var(--accent-lt)"/>
+    <rect x="54"  y="38" width="20" height="34" rx="3" fill="var(--accent-lt)"/>
+    <rect x="80"  y="32" width="20" height="40" rx="3" fill="var(--accent-lt)"/>
+    <rect x="106" y="36" width="20" height="36" rx="3" fill="var(--accent-lt)"/>
+    <rect x="132" y="44" width="20" height="28" rx="3" fill="var(--accent-lt)"/>
+    <rect x="158" y="39" width="20" height="33" rx="3" fill="var(--accent-lt)"/>
+    <rect x="184" y="18" width="20" height="54" rx="3" fill="#FAEEDA"/>
+    <rect x="210" y="37" width="20" height="35" rx="3" fill="var(--accent-lt)"/>
+    <rect x="236" y="40" width="20" height="32" rx="3" fill="var(--accent-lt)"/>
+    <rect x="262" y="33" width="20" height="39" rx="3" fill="var(--accent-lt)"/>
+    <rect x="288" y="20" width="20" height="52" rx="3" fill="#FAEEDA"/>
+  </svg>
+  <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <span style="font-size:9px;color:var(--ink3)">apr</span>
+    <span style="font-size:9px;color:var(--ink3)">jun</span>
+    <span style="font-size:9px;color:var(--ink3)">aug</span>
+    <span style="font-size:9px;color:var(--ink3)">okt</span>
+    <span style="font-size:9px;color:var(--warn)">des ↑</span>
+    <span style="font-size:9px;color:var(--ink3)">feb</span>
+    <span style="font-size:9px;color:var(--warn);font-weight:700">mars ↑</span>
+  </div>
+</div>
+
+<!-- KATEGORIER MED NORMALLINJE -->
+<div style="padding:0 22px 6px;display:flex;align-items:center;gap:16px">
+  <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></div><span style="font-size:11px;color:var(--ink3)">Ditt forbruk</span></div>
+  <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:2px;background:var(--ink4);border-radius:1px"></div><span style="font-size:11px;color:var(--ink3)">Normalt</span></div>
+</div>
+
+<div style="margin:6px 18px 10px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Mat og dagligvarer</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">78 000 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:78%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:66%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--warn)">+18% over normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 66 200 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Restaurant</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">28 400 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:86%;height:6px;background:var(--err);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:56%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--err)">+52% over normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 18 600 kr</span>
+    </div>
+    <div style="background:var(--ok-bg);border-radius:var(--r1);padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:var(--accent-dk)">Sett mål: 20 000 kr/år?</span>
+      <button onclick="showToast('Mål satt: 20 000 kr/år på restaurant')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Sett mål</button>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Transport</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">22 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:55%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:58%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 24 000 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Helse og apotek</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">7 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:32%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:40%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 9 600 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Klær og sko</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">10 680 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:40%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:48%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 12 600 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Hobby og fritid</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">14 880 kr</span>
+    </div>
+    <div style="position:relative;height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:45%;height:6px;background:var(--accent);border-radius:3px"></div>
+      <div style="position:absolute;top:-3px;left:43%;width:2px;height:12px;background:var(--ink4);border-radius:1px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <span style="font-size:11px;color:var(--ok)">Innenfor normalt</span>
+      <span style="font-size:11px;color:var(--ink3)">Normalt: 14 000 kr</span>
+    </div>
+  </div>
+
+  <div style="padding:14px 18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:500;color:var(--ink)">Vipps og ukjent</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ink)">37 956 kr</span>
+    </div>
+    <div style="height:6px;background:var(--sf3);border-radius:3px;margin-bottom:5px">
+      <div style="width:68%;height:6px;background:#EF9F27;border-radius:3px"></div>
+    </div>
+    <div style="font-size:11px;color:var(--warn)">Ikke kategorisert – kategoriser for bedre innsikt</div>
+  </div>
+</div>
+
+<!-- ÅRETS INNSIKTER -->
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Det vi la merke til</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd);display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--err-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">🍽</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">28 400 kr på restaurant</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">2 367 kr/mnd i snitt. Mye av dette er Wolt og Foodora.</div></div>
+  </div>
+  <div style="padding:14px 18px;border-bottom:.5px solid var(--bd);display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--warn-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">📦</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">Desember var din dyreste måned</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">34 200 kr ut – 28% over ditt månedlige snitt.</div></div>
+  </div>
+  <div style="padding:14px 18px;display:flex;align-items:flex-start;gap:12px">
+    <div style="width:36px;height:36px;border-radius:10px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">💰</div>
+    <div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px">Du sparte 88 800 kr totalt</div><div style="font-size:13px;color:var(--ink3);line-height:1.5">21,6% av inntekten – over norsk snitt.</div></div>
+  </div>
+</div>
+
+</div></div>
+
+<div class="tabbar">
+<button class="titem" onclick="tab('home')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="7" height="9" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/><rect x="12" y="3" width="7" height="16" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/></svg><span class="titem-lbl">Hjem</span></button>
+<button class="titem on" onclick="tab('budget')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h10M4 16h7" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Budsjett</span></button>
+<button class="titem" onclick="tab('okonomi')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="var(--ink3)" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Økonomi</span></button>
+<button class="titem" onclick="tab('spor')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8l-4 3V6z" stroke="var(--ink3)" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="titem-lbl">Spør</span></button>
+</div>
+</div>
+
+<!-- ØKONOMI -->
+<div class="sc" id="okonomi">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div style="width:60px"></div><div class="tnav-title">Økonomi</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:100px">
+
+<!-- 1. NETTO FORMUE HERO med historisk graf -->
+<div style="margin:6px 18px 14px;background:var(--accent);border-radius:var(--r3);overflow:hidden">
+  <div style="padding:22px 22px 16px">
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Netto formue</div>
+    <div style="font-size:44px;font-weight:700;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:3px">3 560 000 kr</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <span style="font-size:13px;font-weight:600;color:#6FCF97">↑ 340 000 kr</span>
+      <span style="font-size:13px;color:rgba(255,255,255,.55)">siste 12 måneder</span>
+    </div>
+    <!-- SVG historisk formue-graf -->
+    <div style="height:72px;position:relative;margin-bottom:6px">
+      <svg width="100%" height="72" viewBox="0 0 330 72" preserveAspectRatio="none">
+        <!-- Grid-linjer -->
+        <line x1="0" y1="18" x2="330" y2="18" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <line x1="0" y1="36" x2="330" y2="36" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <line x1="0" y1="54" x2="330" y2="54" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <!-- Fargefyll under kurven -->
+        <polygon points="0,62 55,58 110,52 165,44 220,34 275,20 330,8 330,72 0,72" fill="rgba(255,255,255,.1)"/>
+        <!-- Kurve -->
+        <polyline points="0,62 55,58 110,52 165,44 220,34 275,20 330,8" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Nåpunkt -->
+        <circle cx="330" cy="8" r="5" fill="#fff"/>
+        <circle cx="330" cy="8" r="3" fill="var(--accent)"/>
+      </svg>
+    </div>
+    <!-- X-akse måneder -->
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:10px;color:rgba(255,255,255,.35)">apr '25</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.35)">jul</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.35)">okt</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.35)">jan '26</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.85);font-weight:600">nå</span>
+    </div>
+  </div>
+  <!-- Eiendeler/Gjeld breakdown -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;border-top:.5px solid rgba(255,255,255,.12)">
+    <div style="padding:13px 20px">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Eiendeler</div>
+      <div style="font-size:20px;font-weight:700;color:#fff;letter-spacing:-.5px">5 875 000 kr</div>
+    </div>
+    <div style="padding:13px 20px;border-left:.5px solid rgba(255,255,255,.12)">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Gjeld</div>
+      <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:-.5px">2 315 000 kr</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. EIENDELER – rik integrasjonsdata -->
+<div style="padding:2px 22px 10px;display:flex;align-items:center;justify-content:space-between">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Eiendeler</span>
+  <span style="font-size:12px;color:var(--ink3)">Trykk for detaljer →</span>
+</div>
+
+<!-- BOLIG KORT – rik data fra Hjemla/Kartverket -->
+<div onclick="go('eiendom-detalj')" style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden;cursor:pointer">
+  <!-- Toppseksjon: adresse + verdi -->
+  <div style="display:flex;align-items:center;gap:14px;padding:18px 18px 14px;border-bottom:.5px solid var(--bd)">
+    <div style="width:48px;height:48px;border-radius:13px;background:#1A3A5C;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10.5z" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 22v-7h5.5v7" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:1px">Storgata 12, Oslo</div>
+      <div style="font-size:12px;color:var(--ink3)">78 m² · Leilighet · Hjemla</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">4 200 000</div>
+      <div style="font-size:11px;color:var(--ink3)">kr estimert</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <!-- Data fra integrasjon -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:.5px solid var(--bd)">
+    <div style="padding:11px 0;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:var(--ok)">+18%</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">siden kjøp</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">54%</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">belåningsgrad</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">53 846</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">kr/m²</div>
+    </div>
+  </div>
+  <!-- Kontekstuell innsikt fra nabolagsdata -->
+  <div style="padding:11px 18px;background:var(--sf2);display:flex;align-items:center;gap:10px">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="var(--accent)" stroke-width="1.4"/><path d="M8 7v5M8 5v.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span style="font-size:12px;color:var(--accent-dk)">Nabolaget steg 12% siste år – du ligger 29% under snitt-kvm-pris i Gamle Oslo</span>
+  </div>
+</div>
+
+<!-- ELBIL KORT – data fra Statens vegvesen -->
+<div onclick="go('bil-detalj')" style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden;cursor:pointer">
+  <div style="display:flex;align-items:center;gap:14px;padding:18px 18px 14px;border-bottom:.5px solid var(--bd)">
+    <div style="width:48px;height:48px;border-radius:13px;background:#1C2B35;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12l2-5h14l2 5v5H3v-5z" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.5" stroke="rgba(255,255,255,.85)" stroke-width="1.4"/><circle cx="17" cy="17.5" r="1.5" stroke="rgba(255,255,255,.85)" stroke-width="1.4"/><path d="M5 12h2.5l1-3h7l1 3H19" stroke="rgba(255,255,255,.5)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:1px">Tesla Model 3 · 2021</div>
+      <div style="font-size:12px;color:var(--ink3)">EK 12345 · Statens vegvesen</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">295 000</div>
+      <div style="font-size:11px;color:var(--ink3)">kr estimert</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:.5px solid var(--bd)">
+    <div style="padding:11px 0;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:var(--err)">−85 000</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">siden kjøp</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">62 000</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">km kjørt</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ok)">Aug 26</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">EU-kontroll</div>
+    </div>
+  </div>
+  <div style="padding:11px 18px;background:var(--sf2);display:flex;align-items:center;gap:10px">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="var(--warn)" stroke-width="1.4"/><path d="M8 5v4M8 11v.5" stroke="var(--warn)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span style="font-size:12px;color:var(--warn)">Faller ca. 25 000 kr/år – spør agenten om det lønner seg å selge nå</span>
+  </div>
+</div>
+
+<!-- BANKINNSKUDD KORT – data fra PSD2 -->
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+  <div style="display:flex;align-items:center;gap:14px;padding:18px 18px 14px;border-bottom:.5px solid var(--bd)">
+    <div style="width:48px;height:48px;border-radius:13px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" stroke="var(--ok)" stroke-width="1.6"/><path d="M2 11h20" stroke="var(--ok)" stroke-width="1.6"/><path d="M6 15h4" stroke="var(--ok)" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:1px">Bankinnskudd</div>
+      <div style="font-size:12px;color:var(--ink3)">DNB · Brukskonto + Sparekonto · PSD2</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">1 380 000</div>
+      <div style="font-size:11px;color:var(--ink3)">kr totalt</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:.5px solid var(--bd)">
+    <div style="padding:11px 0;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">80 000</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">brukskonto</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ok)">1 300 000</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">sparekonto</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ok)">4,0%</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">rente</div>
+    </div>
+  </div>
+  <div style="padding:11px 18px;background:var(--sf2);display:flex;align-items:center;gap:10px">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="var(--accent)" stroke-width="1.4"/><path d="M8 7v5M8 5v.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span style="font-size:12px;color:var(--accent-dk)">Sparekontoen din gir 52 000 kr i renter per år på nåværende saldo</span>
+  </div>
+</div>
+
+<!-- 3. GJELD – prioritert med kostnad per krone -->
+<div style="padding:14px 22px 10px;display:flex;align-items:center;justify-content:space-between">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Gjeld</span>
+  <span onclick="go('lan')" style="font-size:12px;color:var(--accent);cursor:pointer;font-weight:500">Se alle →</span>
+</div>
+
+<!-- Gjeld-oversikt med belåningsgrad -->
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+  <!-- Total gjeld + belåningsgrad visuelt -->
+  <div style="padding:16px 18px 12px;border-bottom:.5px solid var(--bd)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+      <span style="font-size:13px;color:var(--ink3)">Total gjeld</span>
+      <span style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.5px">2 315 200 kr</span>
+    </div>
+    <!-- Belåningsgrad som stacked bar -->
+    <div style="height:8px;background:var(--sf3);border-radius:4px;overflow:hidden;margin-bottom:6px;display:flex">
+      <div style="width:54%;height:8px;background:var(--accent)" title="Gjeld 54%"></div>
+      <div style="flex:1;height:8px;background:var(--ok-bg)" title="Egenkapital 46%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px">
+      <span style="color:var(--accent);font-weight:600">54% belånt</span>
+      <span style="color:var(--ok);font-weight:600">46% egenkapital (1 930 000 kr)</span>
+    </div>
+  </div>
+  <!-- Lån per post sortert etter kostnad -->
+  <div onclick="go('lan-forbruk')" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--err);flex-shrink:0;margin-top:1px"></div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Forbrukslån · Santander</div>
+      <div style="font-size:12px;color:var(--err);margin-top:1px;font-weight:500">18,9% · dyrest per krone · refinansier nå</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">42 000 kr</div>
+      <div style="font-size:11px;color:var(--err)">1 450 kr/mnd</div>
+    </div>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div onclick="go('lan-bolig')" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--warn);flex-shrink:0;margin-top:1px"></div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Boliglån · DNB</div>
+      <div style="font-size:12px;color:var(--warn);margin-top:1px;font-weight:500">5,8% · kan forbedres til 4,6%</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">2 270 000 kr</div>
+      <div style="font-size:11px;color:var(--warn)">18 450 kr/mnd</div>
+    </div>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;padding:14px 18px">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0;margin-top:1px"></div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Kredittkort · DNB Visa</div>
+      <div style="font-size:12px;color:var(--ok);margin-top:1px;font-weight:500">Betales ved forfall · ingen rentekostnad</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:14px;font-weight:700;color:var(--ink)">3 200 kr</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. LIKVIDITETSPROGNOSE -->
+<div style="padding:14px 22px 10px">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Likviditetsprognose</span>
+</div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+  <div style="padding:16px 18px 14px;border-bottom:.5px solid var(--bd)">
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">Estimert kontosaldo de neste 30 dagene</div>
+    <!-- Enkel prognose-graf -->
+    <div style="height:52px;position:relative;margin-bottom:8px">
+      <svg width="100%" height="52" viewBox="0 0 310 52" preserveAspectRatio="none">
+        <polygon points="0,20 52,22 104,18 156,14 208,10 260,6 310,8 310,52 0,52" fill="rgba(13,110,110,.1)"/>
+        <polyline points="0,20 52,22 104,18 156,14 208,10 260,6 310,8" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Vertikal stiplet linje for "i dag" -->
+        <line x1="0" y1="0" x2="0" y2="52" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <!-- Nåverdi dot -->
+        <circle cx="0" cy="20" r="4" fill="var(--accent)"/>
+      </svg>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink3)">
+      <span>I dag</span><span>10 dager</span><span>20 dager</span><span>30 dager</span>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:.5px solid var(--bd)">
+    <div style="padding:11px 0;text-align:center">
+      <div style="font-size:16px;font-weight:700;color:var(--ink)">80 000</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">kr nå</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--warn)">−26 200</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">faste utgifter</div>
+    </div>
+    <div style="padding:11px 0;text-align:center;border-left:.5px solid var(--bd)">
+      <div style="font-size:16px;font-weight:700;color:var(--ok)">61 400</div>
+      <div style="font-size:10px;color:var(--ink3);margin-top:2px">om 30 dager</div>
+    </div>
+  </div>
+  <div style="padding:11px 18px;background:var(--sf2);display:flex;align-items:center;gap:10px">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7" stroke="var(--accent)" stroke-width="1.4"/><path d="M8 7v5M8 5v.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span style="font-size:12px;color:var(--accent-dk)">Lønn forventes 20. april – saldo stiger til ca. 107 000 kr</span>
+  </div>
+</div>
+
+</div></div>
+<div class="tabbar">
+<button class="titem" onclick="tab('home')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="7" height="9" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/><rect x="12" y="3" width="7" height="16" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/></svg><span class="titem-lbl">Hjem</span></button>
+<button class="titem" onclick="tab('budget')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h10M4 16h7" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Budsjett</span></button>
+<button class="titem on" onclick="tab('okonomi')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="var(--accent)" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Økonomi</span></button>
+<button class="titem" onclick="tab('spor')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8l-4 3V6z" stroke="var(--ink3)" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="titem-lbl">Spør</span></button>
+</div>
+</div>
+
+
+<!-- FORMUE -->
+<div class="sc" id="formue">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Din formue</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+
+<!-- HERO: Netto formue -->
+<div style="margin:8px 18px 14px;background:var(--accent);border-radius:var(--r3);overflow:hidden;">
+  <div style="padding:22px 22px 18px">
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Netto formue</div>
+    <div style="font-size:44px;font-weight:700;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:4px">3 560 000 kr</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:14px">↑ 340 000 kr siste 12 måneder</div>
+    <div style="height:5px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="width:62%;height:5px;background:rgba(255,255,255,.85);border-radius:3px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.55)">
+      <span>Eiendeler 5 875 000</span><span>Gjeld 2 315 000</span>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:.5px solid rgba(255,255,255,.12)">
+    <div style="padding:12px 0 14px;text-align:center"><div style="font-size:15px;font-weight:700;color:#fff">4,2 mill</div><div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Bolig</div></div>
+    <div style="padding:12px 0 14px;text-align:center;border-left:.5px solid rgba(255,255,255,.12)"><div style="font-size:15px;font-weight:700;color:#fff">295 000</div><div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Elbil</div></div>
+    <div style="padding:12px 0 14px;text-align:center;border-left:.5px solid rgba(255,255,255,.12)"><div style="font-size:15px;font-weight:700;color:#fff">1 380 000</div><div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:2px">Innskudd</div></div>
+  </div>
+</div>
+
+<!-- EIENDELER – tydelig klikkbare med chevron og hover -->
+<div style="padding:0 22px 10px;display:flex;align-items:center;justify-content:space-between">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Eiendeler</span>
+  <span style="font-size:12px;color:var(--ink3)">Trykk for detaljer</span>
+</div>
+
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <!-- Bolig -->
+  <div onclick="go('eiendom-detalj')" style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;border-bottom:.5px solid var(--bd);transition:background .1s" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='transparent'">
+    <div style="width:46px;height:46px;border-radius:13px;background:#1A3A5C;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10l8-7 8 7v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9z" stroke="rgba(255,255,255,.8)" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 20v-6h5v6" stroke="rgba(255,255,255,.8)" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">Storgata 12, Oslo</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:2px">78 m² · Hjemla/Kartverket</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <span style="font-size:11px;font-weight:600;color:var(--ok);background:var(--ok-bg);padding:2px 7px;border-radius:5px">↑ +640 000 kr</span>
+        <span style="font-size:11px;color:var(--ink3)">siden kjøp</span>
+      </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px">4 200 000</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px">kr</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-left:4px"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- Elbil -->
+  <div onclick="go('bil-detalj')" style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;border-bottom:.5px solid var(--bd);transition:background .1s" onmouseover="this.style.background='var(--sf2)'" onmouseout="this.style.background='transparent'">
+    <div style="width:46px;height:46px;border-radius:13px;background:#1C2B35;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11l2-5h12l2 5v5H3v-5z" stroke="rgba(255,255,255,.8)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="6.5" cy="16.5" r="1.5" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/><circle cx="15.5" cy="16.5" r="1.5" stroke="rgba(255,255,255,.8)" stroke-width="1.4"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">Tesla Model 3 · 2021</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:2px">Statens vegvesen</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <span style="font-size:11px;font-weight:600;color:var(--err);background:var(--err-bg);padding:2px 7px;border-radius:5px">↓ −85 000 kr</span>
+        <span style="font-size:11px;color:var(--ink3)">siden kjøp</span>
+      </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px">295 000</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px">kr</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-left:4px"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- Bankinnskudd -->
+  <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;">
+    <div style="width:46px;height:46px;border-radius:13px;background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="6" width="16" height="12" rx="2" stroke="var(--ok)" stroke-width="1.6"/><path d="M3 10h16" stroke="var(--ok)" stroke-width="1.6"/></svg>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">Bankinnskudd</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:2px">DNB · PSD2</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <span style="font-size:11px;font-weight:600;color:var(--ok);background:var(--ok-bg);padding:2px 7px;border-radius:5px">↑ +124 000 kr</span>
+        <span style="font-size:11px;color:var(--ink3)">siste år</span>
+      </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px">1 380 000</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px">kr</div>
+    </div>
+  </div>
+</div>
+
+<!-- GJELD -->
+<div style="padding:14px 22px 10px;display:flex;align-items:center;justify-content:space-between">
+  <span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Gjeld</span>
+</div>
+<div class="card">
+  <div class="crow tap" onclick="go('lan')"><div><div class="cl">Forbrukslån · Santander</div><div style="font-size:12px;color:var(--err);margin-top:2px;font-weight:500">18,9% · refinansier nå</div></div><div style="display:flex;align-items:center;gap:8px"><div class="cv r">42 000 kr</div><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+  <div class="crow tap" onclick="go('lan')"><div><div class="cl">Boliglån · DNB</div><div style="font-size:12px;color:var(--warn);margin-top:2px;font-weight:500">5,8% · kan forbedres</div></div><div style="display:flex;align-items:center;gap:8px"><div class="cv">2 270 000 kr</div><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+  <div class="crow"><div><div class="cl">Kredittkort · DNB Visa</div><div style="font-size:12px;color:var(--ok);margin-top:2px;font-weight:500">Betales ved forfall</div></div><div class="cv">3 200 kr</div></div>
+</div>
+</div></div>
+</div>
+
+<!-- EIENDOM DETALJ -->
+<div class="sc" id="eiendom-detalj">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Din bolig</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="prop-card" style="margin-top:10px"><div class="prop-img"><div class="prop-ov"></div><div class="prop-lbl">Storgata 12, 0182 Oslo · 78 m²</div></div><div class="prop-stats"><div class="prop-stat"><div class="psv">4 200 000</div><div class="psl">Estimert verdi</div></div><div class="prop-stat"><div class="psv" style="color:#6FCF97">+640 000</div><div class="psl">Siden kjøp</div></div><div class="prop-stat"><div class="psv">53 846</div><div class="psl">kr/m²</div></div></div><div class="prop-ltv"><div class="ltv-bar"><div class="ltv-fill" style="width:54%"></div></div><div class="ltv-lbls"><span>0%</span><span style="color:#6FCF97">54% belåningsgrad</span><span>100%</span></div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px;margin-top:4px"><div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px"><div style="font-size:18px;font-weight:700;color:var(--ok)">+18%</div><div style="font-size:12px;color:var(--ink3);margin-top:3px">verdistigning siden kjøp</div></div><div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px"><div style="font-size:18px;font-weight:700;color:var(--ink)">1 930 000</div><div style="font-size:12px;color:var(--ink3);margin-top:3px">kr egenkapital</div></div></div>
+<div class="sh"><span class="sh-t">Nabolaget · Hjemla</span></div>
+<div class="card"><div class="crow"><div class="cl">Bydel</div><div class="cv">Gamle Oslo</div></div><div class="crow"><div class="cl">Prisutvikling (12 mnd)</div><div class="cv g">+12%</div></div><div class="crow"><div class="cl">Snitt kvm-pris</div><div class="cv">76 000 kr/m²</div></div></div>
+<div class="info-box ib-g" style="margin-top:6px"><div class="ib-t ibt-g">Mulighet: samle lån i boliglånet</div><div class="ib-s ibs-g">Med 54% belåningsgrad kan du øke lånet med 42 000 kr og betale ut Santander til 18,9%. Ny belåningsgrad 55%.</div><button style="margin-top:10px;width:100%;padding:12px;border-radius:var(--r1);border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="go('samlelaan')">Åpne samlelån-kalkulator</button></div>
+</div></div>
+</div>
+
+<!-- BIL DETALJ -->
+<div class="sc" id="bil-detalj">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Din elbil</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:10px 18px 8px" class="bil-card"><div class="bil-top"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><path d="M6 22l4-10h24l4 10v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9z" stroke="rgba(255,255,255,.45)" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="32" r="3" stroke="rgba(255,255,255,.45)" stroke-width="1.8"/><circle cx="32" cy="32" r="3" stroke="rgba(255,255,255,.45)" stroke-width="1.8"/></svg></div><div class="bil-stats"><div class="bil-stat"><div class="bsv">295 000</div><div class="bsl">Estimert verdi</div></div><div class="bil-stat"><div class="bsv" style="color:#FF6B6B">−85 000</div><div class="bsl">Siden kjøp</div></div><div class="bil-stat"><div class="bsv">62 000 km</div><div class="bsl">Kjørt</div></div></div></div>
+<div class="sh"><span class="sh-t">Kjøretøydata · Statens vegvesen</span></div>
+<div class="card"><div class="crow"><div class="cl">Reg.nr</div><div class="cv">EK 12345</div></div><div class="crow"><div class="cl">Drivstoff</div><div class="cv">Elektrisk</div></div><div class="crow"><div class="cl">Kilometerstand</div><div class="cv">62 000 km</div></div><div class="crow"><div class="cl">EU-kontroll</div><div class="cv g">Gyldig til aug 2026</div></div></div>
+<div class="info-box ib-o" style="margin-top:6px"><div class="ib-t ibt-o">Faller ca. 25 000 kr per år</div><div class="ib-s ibs-o">Spør agenten om det lønner seg å selge nå.</div></div>
+</div></div>
+</div>
+
+<!-- BUDSJETT: KATEGORI MAT -->
+<div class="sc" id="bud-mat">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title">Mat og dagligvarer</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:8px 18px 14px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px">6 500 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="width:62%;height:5px;background:#EF9F27;border-radius:3px"></div></div>
+  <div style="font-size:13px;color:var(--warn)">+18% over normalt for din profil</div>
+</div>
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">13. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Rema 1000 SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#CC0000;display:flex;align-items:center;justify-content:center">
+      <svg width="36" height="36" viewBox="0 0 36 36"><rect width="36" height="36" fill="#CC0000"/><text x="18" y="15" font-size="7" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">REMA</text><text x="18" y="26" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">1000</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Rema 1000 Grünerløkka</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">13. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−487 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">12. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Kiwi SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#005CA9"/><ellipse cx="20" cy="20" rx="14" ry="14" fill="#FFD700"/><text x="20" y="24" font-size="10" font-weight="900" fill="#005CA9" text-anchor="middle" font-family="Arial">KIWI</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Kiwi Torggata</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">12. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−312 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">10. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#CC0000;display:flex;align-items:center;justify-content:center">
+      <svg width="36" height="36" viewBox="0 0 36 36"><rect width="36" height="36" fill="#CC0000"/><text x="18" y="15" font-size="7" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">REMA</text><text x="18" y="26" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">1000</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Rema 1000 Grünerløkka</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">10. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−654 kr</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Coop SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#00704A"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">COOP</text><text x="20" y="29" font-size="7" font-weight="700" fill="#FFD700" text-anchor="middle" font-family="Arial">EXTRA</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Coop Extra Storo</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">10. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−234 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">8. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Meny SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#B71234"/><text x="20" y="24" font-size="10" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">MENY</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Meny Bogstadveien</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">8. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−278 kr</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#005CA9"/><ellipse cx="20" cy="20" rx="14" ry="14" fill="#FFD700"/><text x="20" y="24" font-size="10" font-weight="900" fill="#005CA9" text-anchor="middle" font-family="Arial">KIWI</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Kiwi Torggata</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">8. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−189 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">5. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#CC0000;display:flex;align-items:center;justify-content:center">
+      <svg width="36" height="36" viewBox="0 0 36 36"><rect width="36" height="36" fill="#CC0000"/><text x="18" y="15" font-size="7" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">REMA</text><text x="18" y="26" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">1000</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Rema 1000 Grünerløkka</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">5. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−892 kr</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#00704A"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">COOP</text><text x="20" y="29" font-size="7" font-weight="700" fill="#FFD700" text-anchor="middle" font-family="Arial">EXTRA</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Coop Extra Storo</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">5. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−463 kr</div>
+  </div>
+</div>
+</div></div>
+</div>
+
+<!-- BUDSJETT: KATEGORI RESTAURANT -->
+<div class="sc" id="bud-rest">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title">Restaurant</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:8px 18px 14px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px">2 367 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="width:72%;height:5px;background:#E24B4A;border-radius:3px"></div></div>
+  <div style="font-size:13px;color:var(--err)">+52% over normalt · Foodora/Wolt utgjør 50%</div>
+</div>
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">12. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Wolt SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#009DE0"/><text x="20" y="25" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">wolt</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Wolt</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">12. april · app-betaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−289 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">10. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Foodora SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#FC3E73"/><text x="20" y="17" font-size="7" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">food</text><text x="20" y="28" font-size="7" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">ora</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Foodora</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">10. april · app-betaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−354 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">8. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Restaurant generisk -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#1A2744"/><text x="20" y="17" font-size="7" font-weight="700" fill="rgba(255,255,255,.7)" text-anchor="middle" font-family="Arial">LOFOTEN</text><text x="20" y="28" font-size="7" font-weight="700" fill="rgba(255,255,255,.7)" text-anchor="middle" font-family="Arial">REST.</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Lofoten Restaurant</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">8. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−828 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">5. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Tim Wendelboe kafe -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#3D2B1F"/><text x="20" y="18" font-size="6.5" font-weight="700" fill="rgba(255,255,255,.8)" text-anchor="middle" font-family="serif">Tim</text><text x="20" y="29" font-size="5.5" font-weight="700" fill="rgba(255,255,255,.6)" text-anchor="middle" font-family="serif">Wendelboe</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Tim Wendelboe</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">5. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−78 kr</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#009DE0"/><text x="20" y="25" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">wolt</text></svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Wolt</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">5. april · app-betaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−271 kr</div>
+  </div>
+</div>
+</div></div>
+</div>
+
+<!-- BUDSJETT: KATEGORI TRANSPORT -->
+<div class="sc" id="bud-transport">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title">Transport</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:8px 18px 14px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px">1 890 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="width:38%;height:5px;background:var(--accent-mid);border-radius:3px"></div></div>
+  <div style="font-size:13px;color:var(--ok)">Innenfor normalt</div>
+</div>
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden">
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">1. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Ruter SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" fill="#E8173B"/>
+        <text x="20" y="25" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Ruter</text>
+      </svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Ruter månedskort</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">1. april · kortbetaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−283 kr</div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">7. april</span></div>
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <!-- Uber SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" fill="#000000"/>
+        <text x="20" y="25" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Uber</text>
+      </svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Uber</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">7. april · app-betaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−189 kr</div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" fill="#000000"/>
+        <text x="20" y="25" font-size="11" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Uber</text>
+      </svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Uber</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">3. april · app-betaling</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−212 kr</div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;padding:14px 18px">
+    <!-- Oslo Bysykkel SVG logo -->
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" fill="#E84A0A"/>
+        <text x="20" y="18" font-size="6.5" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">OSLO</text>
+        <text x="20" y="27" font-size="5.5" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">BYSYKKEL</text>
+      </svg>
+    </div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">Oslo Bysykkel</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">Sesongkort · mars</div></div>
+    <div style="font-size:15px;font-weight:600;color:var(--ink)">−79 kr</div>
+  </div>
+</div>
+</div></div>
+</div>
+
+<!-- BUDSJETT: GENERISK KATEGORI (Helse, Klær, Hobby) -->
+<div class="sc" id="bud-generisk">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title" id="bud-gen-title">Kategori</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:8px 18px 14px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px" id="bud-gen-amt">0 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div id="bud-gen-bar" style="height:5px;background:var(--accent-mid);border-radius:3px;width:20%"></div></div>
+  <div style="font-size:13px;color:var(--ok)">Innenfor normalt</div>
+</div>
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div id="bud-gen-list" style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden"></div>
+</div></div>
+</div>
+
+<!-- BUDSJETT: VIPPS-BERIKELSE -->
+<div class="sc" id="bud-vipps">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title">Vipps og ukjent</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+
+<!-- Hero -->
+<div style="margin:8px 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px">3 163 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="width:52%;height:5px;background:#EF9F27;border-radius:3px"></div></div>
+  <div style="font-size:13px;color:var(--ink3)">6 transaksjoner · 0 kategorisert</div>
+</div>
+
+<!-- Forklaringsboks -->
+<div style="margin:0 18px 10px;background:var(--warn-bg);border-radius:var(--r2);padding:13px 16px">
+  <div style="font-size:14px;font-weight:600;color:var(--warn);margin-bottom:4px">Hjelp oss å forstå forbruket ditt</div>
+  <div style="font-size:13px;color:var(--warn);line-height:1.55">Vipps-betalinger og ukjente transaksjoner kan ikke kategoriseres automatisk. Trykk på en betaling for å fortelle oss hva den gjaldt.</div>
+</div>
+
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden" id="vipps-list">
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">12. april</span></div>
+  <div id="vtx-1" class="vtx-row" onclick="openVippsModal('vtx-1','Vipps til Ola N.','500 kr','12. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#FF5B24"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Vipps</text><text x="20" y="30" font-size="16" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">✌</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Vipps til Ola N.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">12. april · Vipps</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−500 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">10. april</span></div>
+  <div id="vtx-2" class="vtx-row" onclick="openVippsModal('vtx-2','Vipps til Sara L.','800 kr','10. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#FF5B24"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Vipps</text><text x="20" y="30" font-size="16" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">✌</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Vipps til Sara L.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">10. april · Vipps</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−800 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+
+  <div id="vtx-3" class="vtx-row" onclick="openVippsModal('vtx-3','Ukjent · *4512','463 kr','10. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#888"/><text x="20" y="26" font-size="20" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">?</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Ukjent · *4512</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">10. april · kortbetaling</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−463 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">5. april</span></div>
+  <div id="vtx-4" class="vtx-row" onclick="openVippsModal('vtx-4','Vipps til Petter H.','700 kr','5. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#FF5B24"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Vipps</text><text x="20" y="30" font-size="16" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">✌</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Vipps til Petter H.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">5. april · Vipps</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−700 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+
+  <div id="vtx-5" class="vtx-row" onclick="openVippsModal('vtx-5','Ukjent · *3309','350 kr','3. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd);cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#888"/><text x="20" y="26" font-size="20" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">?</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Ukjent · *3309</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">3. april · kortbetaling</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−350 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+
+  <div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);border-top:.5px solid var(--bd)"><span style="font-size:11px;font-weight:600;color:var(--ink3)">1. april</span></div>
+  <div id="vtx-6" class="vtx-row" onclick="openVippsModal('vtx-6','Vipps til Emma T.','350 kr','1. april')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer">
+    <div style="width:40px;height:40px;border-radius:10px;overflow:hidden;flex-shrink:0">
+      <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#FF5B24"/><text x="20" y="17" font-size="8" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">Vipps</text><text x="20" y="30" font-size="16" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">✌</text></svg>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:500;color:var(--ink)">Vipps til Emma T.</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:1px">1. april · Vipps</div>
+      <div class="vtx-cat-label" style="font-size:11px;color:var(--ink3);margin-top:3px">Ikke kategorisert</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:600;color:var(--ink)">−350 kr</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:3px;font-weight:500">Kategorisr →</div>
+    </div>
+  </div>
+</div>
+</div></div>
+</div>
+
+<!-- MODAL: Vipps-berikelse -->
+<div id="vipps-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:200;border-radius:44px;align-items:flex-end;">
+<div style="background:var(--sf);border-radius:var(--r3) var(--r3) 0 0;width:100%;max-height:88%;overflow-y:auto">
+  <div style="width:40px;height:4px;border-radius:2px;background:var(--bdm);margin:16px auto 0"></div>
+
+  <!-- Transaksjonsinfo øverst -->
+  <div style="padding:16px 22px 14px;border-bottom:.5px solid var(--bd)">
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:2px" id="modal-date"></div>
+    <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:2px" id="modal-name"></div>
+    <div style="font-size:24px;font-weight:700;color:var(--ink)" id="modal-amt"></div>
+  </div>
+
+  <div style="padding:16px 22px 10px">
+    <div style="font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:12px">Hva gjaldt denne betalingen?</div>
+    <!-- Kategori-grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="cat-grid">
+      <button onclick="setVippsCat(this,'Mat og dagligvarer','🛒')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🛒</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Mat og dagligvarer</span>
+      </button>
+      <button onclick="setVippsCat(this,'Restaurant','🍽')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🍽</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Restaurant</span>
+      </button>
+      <button onclick="setVippsCat(this,'Transport','🚌')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🚌</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Transport</span>
+      </button>
+      <button onclick="setVippsCat(this,'Helse og apotek','💊')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">💊</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Helse og apotek</span>
+      </button>
+      <button onclick="setVippsCat(this,'Klær og sko','👕')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">👕</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Klær og sko</span>
+      </button>
+      <button onclick="setVippsCat(this,'Hobby og fritid','🎮')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🎮</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Hobby og fritid</span>
+      </button>
+      <button onclick="setVippsCat(this,'Vennelag / spleise','🤝')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🤝</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Vennelag / spleise</span>
+      </button>
+      <button onclick="setVippsCat(this,'Husleie / regning','🏠')" style="display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:inherit;text-align:left">
+        <span style="font-size:20px">🏠</span><span style="font-size:13px;font-weight:500;color:var(--ink)">Husleie / regning</span>
+      </button>
+    </div>
+    <button onclick="closeVippsModal()" style="display:block;width:100%;padding:14px;border-radius:var(--r2);border:.5px solid var(--bdm);background:transparent;color:var(--ink3);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:12px;margin-bottom:20px">Avbryt</button>
+  </div>
+</div>
+</div>
+
+
+<!-- BUDSJETT: GENERISK KATEGORI (Helse, Klær, Hobby, Vipps) -->
+<div class="sc" id="bud-generisk">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Budsjett</div><div class="tnav-title" id="bud-gen-title">Kategori</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="margin:8px 18px 14px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);padding:20px 20px 16px">
+  <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Mars 2026</div>
+  <div style="font-size:38px;font-weight:700;color:var(--ink);letter-spacing:-1.5px;line-height:1;margin-bottom:4px" id="bud-gen-amt">0 kr</div>
+  <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:6px"><div id="bud-gen-bar" style="height:5px;background:var(--accent-mid);border-radius:3px;width:20%"></div></div>
+  <div style="font-size:13px;color:var(--ok)">Innenfor normalt</div>
+</div>
+<div style="padding:0 22px 10px"><span style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase">Transaksjoner</span></div>
+<div id="bud-gen-list" style="margin:0 18px 8px;background:var(--sf);border-radius:var(--r3);border:.5px solid var(--bd);overflow:hidden"></div>
+</div></div>
+</div>
+
+<!-- LÅN OG GJELD -->
+<div class="sc" id="lan">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Lån og gjeld</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Total gjeld · Gjeldsregisteret</div><div class="damt">2 315 000 kr</div><div class="dsub">oppdatert i dag · bekreftet data</div></div>
+<div style="margin:0 18px 10px"><div class="ep-row"><div class="ep ep-data-s"><div class="ep-dot"></div>Gjeldsregisteret tilkoblet</div><div class="ep ep-data-s"><div class="ep-dot"></div>PSD2 bekreftet</div></div></div>
+<div class="sec" style="padding-bottom:8px"><div class="sec-lbl">Eiendeler · kontekst for lånet</div></div>
+<div class="prop-card" onclick="go('eiendom-detalj')"><div class="prop-img"><div class="prop-ov"></div><div class="prop-lbl">Storgata 12 · 78 m²</div></div><div class="prop-stats"><div class="prop-stat"><div class="psv">4 200 000</div><div class="psl">Boligverdi</div></div><div class="prop-stat"><div class="psv">54%</div><div class="psl">Belåningsgrad</div></div><div class="prop-stat"><div class="psv" style="color:#6FCF97">1 930 000</div><div class="psl">Egenkapital</div></div></div><div class="prop-ltv"><div class="ltv-bar"><div class="ltv-fill" style="width:54%"></div></div><div class="ltv-lbls"><span>0%</span><span style="color:#6FCF97">54% · rom for samlelån</span><span>100%</span></div></div></div>
+<div class="sh"><span class="sh-t">Gjeld prioritert etter kostnad</span></div>
+<div class="card">
+<div class="crow tap" onclick="go('lan-forbruk')" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px"><div style="font-size:10px;font-weight:700;color:var(--err);text-transform:uppercase;letter-spacing:.06em">Forbrukslån · Santander</div><div style="font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.8px">42 000 kr</div><div style="font-size:13px;color:var(--err);font-weight:500">18,9% · 1 450 kr/mnd · dyrest per krone</div><div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:4px">Refinansier eller samle i boliglånet →</div></div>
+<div class="crow tap" onclick="go('lan-bolig')" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px"><div style="font-size:10px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.06em">Boliglån · DNB</div><div style="font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.8px">2 270 000 kr</div><div style="font-size:13px;color:var(--warn);font-weight:500">5,8% · 18 450 kr/mnd</div><div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:4px">Refinansier – spar 1 100 kr/mnd →</div></div>
+<div style="padding:14px 18px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Kredittkort · DNB Visa</div><div style="font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.6px">3 200 kr</div><div style="font-size:13px;color:var(--ok);font-weight:500">Betales ved forfall</div><div style="font-size:12px;color:var(--ink3);margin-top:4px">Kredittkortspørsmål? Bruk Spør-agenten →</div></div>
+</div>
+<div class="sh"><span class="sh-t">Hva vil du gjøre?</span></div>
+
+<!-- SCENARIO A: Har forbrukslån + boliglån → samle-alternativet vises -->
+<div id="lan-scenario-ab">
+  <div class="choice feat" onclick="go('samlelaan')"><div class="ch-top"><span class="ch-title">Samle alle lån i boliglånet</span><span class="ch-badge">Størst effekt</span></div><div class="ch-desc">Øk boliglånet med 42 000 kr og betal ut Santander. 18,9% → 4,6%.</div><div class="ch-save">Spar 2 050 kr/mnd · belåningsgrad 55%</div></div>
+  <div class="choice" onclick="go('lan-forbruk')"><div class="ch-top"><span class="ch-title">Kun refinansier forbrukslånet</span></div><div class="ch-desc">Flytt til Instabank 9,9% – spar 4 100 kr i renter.</div></div>
+  <div class="choice" onclick="go('refinansier')"><div class="ch-top"><span class="ch-title">Kun refinansier boliglånet</span></div><div class="ch-desc">5,8% → 4,6% hos Bulder Bank.</div></div>
+</div>
+
+<!-- SCENARIO B: Bare boliglån → samle-alternativet skjules -->
+<div id="lan-scenario-b" style="display:none">
+  <div class="choice feat" onclick="go('refinansier')"><div class="ch-top"><span class="ch-title">Søk refinansiering</span><span class="ch-badge">Anbefalt</span></div><div class="ch-desc">5,8% → 4,6% hos Bulder Bank. Uforpliktende forespørsel.</div><div class="ch-save">Spar 1 100 kr/mnd · 13 200 kr/år</div></div>
+  <div class="choice" onclick="go('forhandle')"><div class="ch-top"><span class="ch-title">Forhandle med DNB</span></div><div class="ch-desc">Ingen søknad nødvendig. Konkrete argumenter.</div></div>
+</div>
+
+<div style="padding:6px 18px 0">
+  <button style="font-size:12px;color:var(--ink3);background:transparent;border:none;cursor:pointer;text-decoration:underline;font-family:inherit" onclick="toggleLoanScenario()">Demo: bytt til bruker med bare boliglån</button>
+</div>
+<div class="note">Ingen provisjon · Vi viser alle nøytralt · Finansportalen.no</div>
+</div></div>
+</div>
+
+<!-- SAMLELÅN -->
+<div class="sc" id="samlelaan">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Lån</div><div class="tnav-title">Samle lån</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Månedlig besparelse</div><div class="damt">2 050 kr</div><div class="dsub" style="color:var(--ok)">14 300 kr spart totalt</div></div>
+<div class="sh"><span class="sh-t">Beregning</span></div>
+<div class="card"><div class="crow"><div class="cl">Boliglån nå</div><div class="cv">2 270 000 @ 5,8%</div></div><div class="crow"><div class="cl">Legger til Santander</div><div class="cv">+ 42 000 kr</div></div><div class="crow"><div class="cl">Ny belåningsgrad</div><div class="cv g">55% – under 60% ✓</div></div><div class="crow"><div class="cl">Ny rente</div><div class="cv g">4,6% (Bulder Bank)</div></div><div class="crow"><div class="cl">Ny terminbetaling</div><div class="cv">17 850 kr/mnd</div></div><div class="crow"><div class="cl">Tidligere total</div><div class="cv r">19 900 kr/mnd</div></div><div class="crow" style="background:var(--ok-bg)"><div style="font-size:14px;font-weight:700;color:var(--accent-dk)">Besparelse</div><div style="font-size:17px;font-weight:700;color:var(--accent-dk)">2 050 kr/mnd</div></div></div>
+<button class="btn btn-p" style="margin-top:10px" onclick="go('refinansier')">Send søknad om samlelån</button>
+<button class="btn btn-s" onclick="go('lan-forbruk')">Kun refinansier forbrukslånet</button>
+<div class="note">Ingen provisjon · Vi er brukerens agent – ikke bankenes</div>
+</div></div>
+</div>
+
+<!-- FORBRUKSLÅN -->
+<div class="sc" id="lan-forbruk">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Lån</div><div class="tnav-title">Forbrukslån</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Santander Consumer Bank</div><div class="damt">42 000 kr</div><div class="dsub" style="color:var(--err)">18,9% · 1 450 kr/mnd</div></div>
+<div class="sh"><span class="sh-t">Alternativer · rangert nøytralt etter pris</span></div>
+<div class="choice feat" onclick="go('samlelaan')"><div class="ch-top"><span class="ch-title">Samle i boliglånet</span><span class="ch-badge">Størst effekt</span></div><div class="ch-desc">Inn i boliglånet til 4,6%. Spar 14 300 kr totalt.</div><div class="ch-save">Spar 2 050 kr/mnd</div></div>
+<div class="choice" onclick="showToast('Forespørsel sendt til Instabank')"><div class="ch-top"><span class="ch-title">Instabank 9,9%</span></div><div class="ch-desc">Spar 4 100 kr i renter totalt. Ingen provisjon.</div></div>
+<div class="choice" onclick="showToast('Forespørsel sendt til Komplett Bank')"><div class="ch-top"><span class="ch-title">Komplett Bank 11,9%</span></div><div class="ch-desc">Spar 2 600 kr i renter totalt.</div></div>
+<div class="note">Finansportalen.no · Vi tjener ikke provisjon · Søknad inkluderer kredittsjekk</div>
+</div></div>
+</div>
+
+<!-- BOLIGLÅN -->
+<div class="sc" id="lan-bolig">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Lån</div><div class="tnav-title">Boliglån</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Mulig månedlig besparelse</div><div class="damt">+1 100 kr</div><div class="dsub">per måned · 13 200 kr/år</div></div>
+<div class="prop-card" onclick="go('eiendom-detalj')"><div class="prop-img"><div class="prop-ov"></div><div class="prop-lbl">Storgata 12 · 54% belåningsgrad</div></div><div class="prop-stats"><div class="prop-stat"><div class="psv">4,2 mill</div><div class="psl">Verdi</div></div><div class="prop-stat"><div class="psv">54%</div><div class="psl">Belåningsgrad</div></div><div class="prop-stat"><div class="psv" style="color:#EF9F27">5,8%</div><div class="psl">Din rente</div></div></div><div class="prop-ltv"><div class="ltv-bar"><div class="ltv-fill" style="width:54%"></div></div><div class="ltv-lbls"><span>0%</span><span style="color:#6FCF97">54% – god forhandlingsposisjon</span><span>100%</span></div></div></div>
+<div class="sh"><span class="sh-t">Hva vil du gjøre?</span></div>
+<div class="choice feat" onclick="go('samlelaan')"><div class="ch-top"><span class="ch-title">Samle alle lån</span><span class="ch-badge">Størst effekt</span></div><div class="ch-desc">Øk lånet med 42 000 kr og betal ut Santander.</div><div class="ch-save">Spar 2 050 kr/mnd totalt</div></div>
+<div class="choice" onclick="go('refinansier')"><div class="ch-top"><span class="ch-title">Kun refinansier boliglånet</span></div><div class="ch-desc">5,8% → 4,6% hos Bulder Bank.</div></div>
+<div class="choice" onclick="go('forhandle')"><div class="ch-top"><span class="ch-title">Forhandle med DNB</span></div><div class="ch-desc">Ingen søknad nødvendig. Konkrete argumenter.</div></div>
+</div></div>
+</div>
+
+<!-- REFINANSIER -->
+<div class="sc" id="refinansier">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Søk refinansiering</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="card" style="margin:12px 18px 14px"><div class="crow"><div class="cl">1 · Vi sender forespørsel</div><div class="cv" style="font-size:13px">3 banker</div></div><div class="crow"><div class="cl">2 · Du mottar tilbud</div><div class="cv" style="font-size:13px">1–2 virkedager</div></div><div class="crow"><div class="cl">3 · Du velger selv</div><div class="cv" style="font-size:13px">Ingen binding</div></div></div>
+<div class="choice feat" onclick="showToast('Forespørsel sendt til Bulder Bank')"><div class="ch-top"><span class="ch-title">Bulder Bank</span><span class="ch-badge">Lavest rente</span></div><div class="ch-save">4,6% · sparer 1 360 kr/mnd</div></div>
+<div class="choice" onclick="showToast('Forespørsel sendt til Sbanken')"><div class="ch-top"><span class="ch-title">Sbanken</span></div><div class="ch-desc">4,9% · sparer 1 100 kr/mnd</div></div>
+<div class="note">Norgespris.no · Ingen provisjon til Superapp</div>
+</div></div>
+</div>
+
+<!-- FORHANDLE -->
+<div class="sc" id="forhandle">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Forhandle med DNB</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="info-box ib-g" style="margin:12px 18px 6px"><div class="ib-s ibs-g">Ring DNB på 04800. Be om rådgiver for boliglån og si du vurderer å bytte bank.</div></div>
+<div class="sh"><span class="sh-t">Hva du skal si</span></div>
+<div class="card"><div style="padding:15px 18px;border-bottom:.5px solid var(--bd)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Steg 1</div><div style="font-size:13px;color:var(--ink2);font-style:italic;line-height:1.5">"Jeg er boliglånskunde og ønsker å snakke om renten min."</div></div><div style="padding:15px 18px;border-bottom:.5px solid var(--bd)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Steg 2</div><div style="font-size:13px;color:var(--ink2);font-style:italic;line-height:1.5">"Markedet tilbyr 4,6–4,9% for min belåningsgrad. Jeg betaler 5,8%."</div></div><div style="padding:15px 18px"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Steg 3 · Registrer resultatet</div><button style="padding:11px 18px;border-radius:var(--r1);border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onclick="showToast('Ny rente registrert')">Registrer ny rente</button></div></div>
+</div></div>
+</div>
+
+<!-- FORSIKRING -->
+<div class="sc" id="forsikring">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Forsikring</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Mulig besparelse</div><div class="damt">+3 480 kr</div><div class="dsub" style="color:var(--err)">per år · dobbeltforsikring avdekket</div></div>
+<div style="margin:0 18px 10px"><div class="ep-row"><div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet av dokument</div><div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div></div></div>
+<div class="upload" onclick="showToast('Filvelger åpnes')"><div class="uz-ic"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v10M5 6l4-4 4 4" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14h14" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="uz-t">Last opp forsikringspolise</div><div class="uz-s">PDF, bilde eller skjermbilde · automatisk analyse</div></div>
+<div class="sh"><span class="sh-t">Dine poliser</span></div>
+<div class="card">
+<div class="pol"><div class="pol-ic" style="background:var(--ok-bg)"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="var(--ok)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="pol-name">Gjensidige innbo</div><div style="font-size:12px;color:var(--ink3);margin-top:1px"><span class="src-tag src-dok">Bekreftet av dokument</span></div></div><div class="pol-st" style="color:var(--ok)">Tilstrekkelig</div></div>
+<div class="pol"><div class="pol-ic" style="background:var(--err-bg)"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M5 5l8 8M13 5l-8 8" stroke="var(--err)" stroke-width="1.6" stroke-linecap="round"/></svg></div><div style="flex:1"><div class="pol-name">Gjensidige reise</div><div style="font-size:12px;color:var(--ink3);margin-top:1px"><span class="src-tag src-dok">Bekreftet av dokument</span></div></div><div class="pol-st" style="color:var(--err)">Dobbelt!</div></div>
+<div class="pol"><div class="pol-ic" style="background:var(--ok-bg)"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="var(--ok)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="pol-name">LOfavør reise</div><div style="font-size:12px;color:var(--ink3);margin-top:1px"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div class="pol-st" style="color:var(--ok)">Aktiv</div></div>
+</div>
+<div class="info-box ib-r" style="margin-top:6px"><div class="ib-t ibt-r">Dobbeltforsikring avdekket</div><div class="ib-s ibs-r">Du betaler for Gjensidige reise (290 kr/mnd) og har full dekning via LOfavør. Bekreftet av opplastet dokument.</div></div>
+<div class="sh"><span class="sh-t">Billigere alternativer · nøytral rangering</span></div>
+<div class="choice feat" onclick="showToast('Bytte til If igangsatt')"><div class="ch-top"><span class="ch-title">If Skadeforsikring</span><span class="ch-badge">Lavest pris</span></div><div class="ch-save">Sparer 400 kr/mnd · 4 800 kr/år</div></div>
+<div class="choice" onclick="showToast('Bytte til Tryg igangsatt')"><div class="ch-top"><span class="ch-title">Tryg Forsikring</span></div><div class="ch-desc">290 kr/mnd billigere</div></div>
+<button class="btn btn-p" onclick="showToast('Oppsigelse av Gjensidige reiseforsikring igangsatt')">Si opp Gjensidige reise</button>
+<div class="note">LOfavør gir full dekning · Spar 3 480 kr/år · Ingen provisjon til Superapp</div>
+</div></div>
+</div>
+
+<!-- ABONNEMENTER -->
+<div class="sc" id="abonnement">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Abonnementer</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 18px 6px"><div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Totalt</div><div style="font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.5px">2 872 kr</div></div><div style="background:var(--sf);border-radius:var(--r2);border:.5px solid var(--bd);padding:13px"><div style="font-size:10px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Mulig kutt</div><div style="font-size:22px;font-weight:700;color:var(--ok);letter-spacing:-.5px">−568 kr</div></div></div>
+<div style="margin:0 18px 10px"><div class="ep-row"><div class="ep ep-data-m"><div class="ep-dot"></div>Antatt basert på mønster</div></div><div style="font-size:12px;color:var(--ink3);margin-top:4px">Bekreft om du faktisk bruker disse tjenestene – vi har ikke tilgang til logg.</div></div>
+<div class="sh"><span class="sh-t">Krever handling</span></div>
+<div class="card">
+<div class="ab-item"><div class="ab-row" onclick="toggleAb('nf')"><div class="ab-logo">NF</div><div style="flex:1"><div class="ab-name">Netflix</div><div class="ab-sub"><span class="src-tag src-antatt">Antatt ubrukt</span></div></div><div style="text-align:right"><div class="ab-price">219 kr</div><div class="ab-badge b-r">7 uker uten aktivitet</div></div></div><div class="ab-panel" id="nf-p"><div class="ab-panel-t">Vi ser ingen betalinger til Netflix-relaterte tjenester på 7 uker. Bruker du dette?</div><div class="ab-btns"><button class="ab-btn-p" onclick="showToast('Netflix – oppsigelse igangsatt')">Si opp</button><button class="ab-btn-s" onclick="showToast('Netflix beholdt');toggleAb('nf')">Jeg bruker det</button></div></div></div>
+<div class="ab-item" style="border-top:.5px solid var(--bd)"><div class="ab-row" onclick="toggleAb('st')"><div class="ab-logo">ST</div><div style="flex:1"><div class="ab-name">Storytel</div><div class="ab-sub"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div style="text-align:right"><div class="ab-price">49 kr</div><div class="ab-badge b-p">Visste du?</div></div></div><div class="ab-panel" id="st-p"><div class="ab-panel-t">Vi fant Storytel i transaksjonene. Visste du at du betaler for dette?</div><div class="ab-btns"><button class="ab-btn-p" onclick="showToast('Storytel – oppsigelse igangsatt')">Si opp</button><button class="ab-btn-s" onclick="showToast('Storytel beholdt');toggleAb('st')">Jeg bruker det</button></div></div></div>
+<div class="ab-item" style="border-top:.5px solid var(--bd)"><div class="ab-row" onclick="toggleAb('ev')"><div class="ab-logo">EV</div><div style="flex:1"><div class="ab-name">Evo Treningssenter</div><div class="ab-sub"><span class="src-tag src-antatt">Antatt ubrukt</span></div></div><div style="text-align:right"><div class="ab-price">349 kr</div><div class="ab-badge b-r">Mønster</div></div></div><div class="ab-panel" id="ev-p"><div class="ab-panel-t">Vi har ikke tilgang til besøkslogg – men betalingsmønsteret tyder på lite bruk.</div><div class="ab-btns"><button class="ab-btn-p" onclick="showToast('Evo – oppsigelse igangsatt')">Si opp</button><button class="ab-btn-s" onclick="showToast('Evo beholdt');toggleAb('ev')">Jeg bruker det</button></div></div></div>
+</div>
+</div></div>
+</div>
+
+<!-- MOBIL -->
+<div class="sc" id="mobil">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Mobil og internett</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Mulig månedlig besparelse</div><div class="damt">+379 kr</div><div class="dsub">4 548 kr per år</div></div>
+<div style="margin:0 18px 10px"><div class="ep-row"><div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet forbruksdata</div></div><div style="font-size:12px;color:var(--ink3);margin-top:4px">Faktisk datakonsumpsjon fra PSD2-transaksjonsanalyse.</div></div>
+<div class="sh"><span class="sh-t">Mobil · Telenor 20 GB · 549 kr/mnd</span></div>
+<div class="info-box ib-g" style="margin-bottom:10px"><div class="ib-s ibs-g">Du bruker i snitt <strong>11 GB/mnd</strong> – siste 6 måneder bekreftet.</div></div>
+<div class="ftabs">
+<button class="ftab off" onclick="filtM(this,'lav')">Under 10 GB</button>
+<button class="ftab on" onclick="filtM(this,'mid')">10–20 GB</button>
+<button class="ftab off" onclick="filtM(this,'hoy')">Over 20 GB</button>
+<button class="ftab off" onclick="filtM(this,'ub')">Ubegrenset</button>
+</div>
+<div id="mob-res">
+<div class="choice feat" style="margin-bottom:8px"><div class="ch-top"><span class="ch-title">Chilimobil 15 GB</span><span class="ch-badge">Lavest pris i klassen</span></div><div class="ch-desc">Telia-nett · EU-roaming</div><div class="ch-save">229 kr/mnd · sparer 320 kr/mnd</div></div>
+<div class="choice"><div class="ch-top"><span class="ch-title">Onecall 20 GB</span></div><div class="ch-desc">Telenor-nett</div><div class="ch-save" style="color:var(--warn)">249 kr/mnd · sparer 300 kr/mnd</div></div>
+</div>
+<div class="sh" style="margin-top:6px"><span class="sh-t">Internett · Telenor Fiber 500+TV · 650 kr/mnd</span></div>
+<div class="info-box ib-o" style="margin-bottom:10px"><div class="ib-s ibs-o"><span class="src-tag src-antatt" style="margin-right:6px">Antatt basert på mønster</span>TV-boksen er trolig ubrukt – vi kan ikke bekrefte uten tilgang til TV-logg.</div></div>
+<button class="btn btn-s" onclick="go('internett-quiz')">Finn riktig internett-pakke for deg</button>
+</div></div>
+</div>
+
+<!-- INTERNETT QUIZ -->
+<div class="sc" id="internett-quiz">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Mobil</div><div class="tnav-title">Internett-quiz</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div style="padding:8px 18px 14px;font-size:14px;color:var(--ink2);line-height:1.6">To raske spørsmål – du vet best, vi analyserer.</div>
+<div class="quiz-card"><div class="quiz-q">Hvor mange strømmer Netflix eller TV-serier <em>samtidig</em> hjemme?</div><div class="qopts"><button class="qopt sel" onclick="selQ(this)"><span class="qic">1</span>Bare meg – én skjerm</button><button class="qopt" onclick="selQ(this)"><span class="qic">2</span>2–3 samtidig</button><button class="qopt" onclick="selQ(this)"><span class="qic">3+</span>Stor husstand</button></div></div>
+<div class="quiz-card"><div class="quiz-q">Bruker du TV-boksen fra Telenor?</div><div class="qopts"><button class="qopt" onclick="selQ(this)"><span class="qic">📺</span>Ja, mye live-TV</button><button class="qopt" onclick="selQ(this)"><span class="qic">~</span>Sjelden</button><button class="qopt sel" onclick="selQ(this)"><span class="qic">✕</span>Nei, bare streaming</button></div></div>
+<button class="btn btn-p" onclick="go('internett-anbefaling')">Se anbefalinger for meg</button>
+</div></div>
+</div>
+
+<!-- INTERNETT ANBEFALING -->
+<div class="sc" id="internett-anbefaling">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Internett-anbefaling</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Basert på dine svar</div><div class="damt" style="font-size:24px;letter-spacing:-.4px;line-height:1.2">Du trenger ikke 500 Mbit og ikke TV.</div></div>
+<div class="info-box ib-g" style="margin-top:6px"><div class="ib-s ibs-g">100 Mbit er mer enn nok for Netflix 4K og videomøter. TV-pakken koster 200 kr/mnd ekstra for noe du ikke bruker.</div></div>
+<div class="sh"><span class="sh-t">Anbefalt · nøytral rangering etter pris</span></div>
+<div class="choice feat" onclick="showToast('Forespørsel sendt til Altibox')"><div class="ch-top"><span class="ch-title">Altibox Fiber 100</span><span class="ch-badge">Lavest pris</span></div><div class="ch-desc">Uten TV · ingen binding etter 12 mnd</div><div class="ch-save">299 kr/mnd · sparer 351 kr/mnd</div></div>
+<div class="choice" onclick="showToast('Ring Telenor – be om Fiber 100 uten TV')"><div class="ch-top"><span class="ch-title">Telenor Fiber 100 uten TV</span></div><div class="ch-desc">Beholder Telenor – enkelt å nedgradere</div><div class="ch-save" style="color:var(--warn)">399 kr/mnd · sparer 251 kr/mnd</div></div>
+<div class="note">Anbefaling basert på dine svar · Ingen provisjon · Du velger fritt</div>
+</div></div>
+</div>
+
+<!-- STRØM -->
+<div class="sc" id="strom">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Strøm</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Mulig besparelse</div><div class="damt">+217 kr</div><div class="dsub">per måned · Fjordkraft nå</div></div>
+<div style="margin:0 18px 10px"><div class="ep-row"><div class="ep ep-data-s"><div class="ep-dot"></div>Bekreftet data</div><div class="ep ep-low"><div class="ep-dot"></div>Lav innsats</div></div></div>
+<div class="sh"><span class="sh-t">Ditt forbruk · Elhub</span></div>
+<div class="card"><div class="crow"><div class="cl">Leverandør</div><div class="cv">Fjordkraft</div></div><div class="crow"><div class="cl">Avtaletype</div><div class="cv o">Variabel pris</div></div><div class="crow"><div class="cl">Forbruk siste 12 mnd</div><div class="cv">14 823 kWh</div></div><div class="crow"><div class="cl">Herav elbil</div><div class="cv">3 200 kWh (22%)</div></div></div>
+<div class="sh"><span class="sh-t">Alternativer · nøytral rangering etter pris</span></div>
+<div class="choice feat" onclick="go('strom-bekreft')"><div class="ch-top"><span class="ch-title">Tibber</span><span class="ch-badge">Lavest pris</span></div><div class="ch-desc">Smart elbil-lading · ingen binding</div><div class="ch-save">Spar 217 kr/mnd</div></div>
+<div class="choice" onclick="showToast('Fjordkraft Spot igangsatt')"><div class="ch-top"><span class="ch-title">Fjordkraft Spot</span></div><div class="ch-desc">Beholder Fjordkraft – spotpris</div><div class="ch-save" style="color:var(--warn)">Spar 143 kr/mnd</div></div>
+<div class="sh"><span class="sh-t">Overvåking</span></div>
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:.5px solid var(--bd)"><div><div style="font-size:15px;color:var(--ink)">Varsle ved bedre tilbud</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Terskel 100 kr/mnd</div></div><div class="tgl on" onclick="this.classList.toggle('on')"><div class="tk"></div></div></div><div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px"><div><div style="font-size:15px;color:var(--ink)">Automatisk bytte</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Kun spotprisavtaler · du godkjenner alltid</div></div><div class="tgl" onclick="this.classList.toggle('on')"><div class="tk"></div></div></div></div>
+<div class="note">Norgespris.no · Ingen provisjon</div>
+</div></div>
+</div>
+
+<!-- STRØM BEKREFT -->
+<div class="sc" id="strom-bekreft">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Bytt til Tibber</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="card" style="margin:12px 18px 8px;padding:14px 18px"><div class="pstep"><div class="pstep-c ps-done">1</div><div><div class="pstep-t">Du bekrefter nå</div><div class="pstep-s">Vi sender til Tibber og sier opp Fjordkraft</div></div></div><div class="pstep"><div class="pstep-c ps-pend">2</div><div><div class="pstep-t">Tibber aktiveres</div><div class="pstep-s">Innen 14 dager · estimert 24. april</div></div></div><div class="pstep"><div class="pstep-c ps-pend">3</div><div><div class="pstep-t">Første besparelse</div><div class="pstep-s">Neste strømregning ca. 217 kr lavere</div></div></div></div>
+<button class="btn btn-p" onclick="go('strom-pagar')">Bekreft bytte</button>
+<button class="btn btn-s" onclick="back()">Avbryt</button>
+</div></div>
+</div>
+
+<!-- STRØM PÅGÅR -->
+<div class="sc" id="strom-pagar">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Strøm</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="dhero"><div class="deye">Bytte igangsatt</div><div class="damt" style="font-size:26px;letter-spacing:-.5px">Tibber aktiveres 24. april</div><div class="dsub" style="color:var(--ok)">Steg 2 av 3 · pågår</div></div>
+<div class="card" style="margin:0 18px 8px;padding:14px 18px"><div class="pstep"><div class="pstep-c ps-done">✓</div><div><div class="pstep-t">Bytte bekreftet</div><div class="pstep-s">10. april kl. 09:41</div></div></div><div class="pstep"><div class="pstep-c ps-act">2</div><div><div class="pstep-t">Tibber aktiveres</div><div class="pstep-s">Pågår · estimert 24. april</div></div></div><div class="pstep"><div class="pstep-c ps-pend">3</div><div><div class="pstep-t">Første besparelse</div><div class="pstep-s">Neste strømregning</div></div></div></div>
+</div></div>
+</div>
+
+<!-- SPAREMÅL -->
+<div class="sc" id="sparemaal">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Sparemål</div><button style="width:34px;height:34px;border-radius:50%;background:var(--sf);border:.5px solid var(--bdm);display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="document.getElementById('gm').classList.add('show')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="goal-card"><div class="goal-body"><div class="goal-icon-row"><div class="goal-ic" style="background:#FFF3E0">✈️</div><div><div class="goal-name">Japan-tur 2027</div><div class="goal-sub">50 000 kr · Neste sommer</div></div></div><div class="goal-amt">34 200 kr</div><div style="font-size:13px;color:var(--ink3);margin-bottom:12px">av 50 000 kr · 68% fullført</div><div class="goal-prog"><div class="goal-prog-fill" style="width:68%"></div></div><div class="goal-lbls"><span style="font-weight:600;color:var(--ink)">15 800 kr igjen</span><span>Oktober 2026</span></div></div><div class="goal-footer"><div class="gf"><div class="gfv" style="color:var(--accent)">68%</div><div class="gfl">fullført</div></div><div class="gf"><div class="gfv">6 mnd</div><div class="gfl">gjenstår</div></div></div></div>
+<div class="info-box ib-g"><div class="ib-s ibs-g" style="margin-bottom:10px">Vil du sette 2 050 kr/mnd fra samlelån-besparelsen mot Japan-tur? Du når målet i juni 2026 – 4 måneder tidligere.</div><button style="width:100%;padding:12px;border-radius:var(--r1);border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="showToast('Automatisk overføring aktivert')">Ja, sett av automatisk</button></div>
+<div class="goal-card"><div class="goal-body"><div class="goal-icon-row"><div class="goal-ic" style="background:var(--ok-bg)">⭐</div><div><div class="goal-name">Buffer</div><div class="goal-sub">102 600 kr · 3 måneder lønn</div></div></div><div class="goal-amt">42 000 kr</div><div style="font-size:13px;color:var(--ink3);margin-bottom:12px">av 102 600 kr · 41% fullført</div><div class="goal-prog"><div class="goal-prog-fill" style="width:41%;background:var(--accent-mid)"></div></div><div class="goal-lbls"><span style="font-weight:600;color:var(--ink)">60 600 kr igjen</span><span>Mars 2027</span></div></div><div class="goal-footer"><div class="gf"><div class="gfv" style="color:var(--accent-mid)">41%</div><div class="gfl">fullført</div></div><div class="gf"><div class="gfv">18 mnd</div><div class="gfl">estimert</div></div></div></div>
+<div style="margin:0 18px;border-radius:var(--r2);border:1.5px dashed var(--bdm);background:var(--sf);padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="document.getElementById('gm').classList.add('show')"><div style="width:34px;height:34px;border-radius:var(--r1);background:var(--ok-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="var(--accent)" stroke-width="1.7" stroke-linecap="round"/></svg></div><div style="font-size:14px;font-weight:600;color:var(--accent)">Legg til nytt sparemål</div></div>
+</div></div>
+</div>
+
+<!-- SPØR – AGENTISK KONTROLLTÅRN -->
+<div class="sc" id="spor">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div style="width:60px"></div><div class="tnav-title">Spør</div><div style="width:60px"></div></div>
+<div class="chat-wrap">
+<div class="chat-msgs" id="cmsgs">
+<div class="msg-a"><div class="bbl-a">Jeg har lest gjennom alle dataene dine. Spør meg om hva du vil – formue, anbefalinger, tilbydere, hva neste steg er.
+<div class="chat-src">Henter fra: Gjeldsregisteret · PSD2 · Hjemla · Elhub · Norgespris.no</div>
+<div class="chip-row">
+<button class="chip" onclick="ask('Hva er nettoformuen min?')">Hva er jeg verdt?</button>
+<button class="chip" onclick="ask('Hva bør jeg gjøre først?')">Hva bør jeg gjøre først?</button>
+<button class="chip" onclick="ask('Bør jeg selge bilen?')">Bør jeg selge bilen?</button>
+<button class="chip" onclick="ask('Hvilket kredittkort passer meg?')">Kredittkort?</button>
+<button class="chip" onclick="ask('Når når jeg Japan-tur-målet?')">Japan-tur-prognose?</button>
+<button class="chip" onclick="ask('Hva vet vi ikke sikkert?')">Hva vet vi ikke sikkert?</button>
+</div>
+</div></div>
+</div>
+<div class="chat-iw"><div class="chat-ir"><input class="chat-inp" id="cinp" placeholder="Spør om din økonomi..." onkeydown="if(event.key==='Enter')sendC()"/><button class="chat-send" onclick="sendC()"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 12L12 7 2 2v4l7 1-7 1v4z" fill="#fff"/></svg></button></div></div>
+</div>
+<div class="tabbar">
+<button class="titem" onclick="tab('home')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="10" width="7" height="9" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/><rect x="12" y="3" width="7" height="16" rx="1.5" stroke="var(--ink3)" stroke-width="1.6"/></svg><span class="titem-lbl">Hjem</span></button>
+<button class="titem" onclick="tab('budget')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h10M4 16h7" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Budsjett</span></button>
+<button class="titem" onclick="tab('okonomi')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="var(--ink3)" stroke-width="1.6"/><path d="M11 7v4l3 2" stroke="var(--ink3)" stroke-width="1.6" stroke-linecap="round"/></svg><span class="titem-lbl">Økonomi</span></button>
+<button class="titem on" onclick="tab('spor')"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8l-4 3V6z" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="titem-lbl">Spør</span></button>
+</div>
+</div>
+
+<!-- INNSTILLINGER -->
+<div class="sc" id="settings">
+<div class="sbar"><span class="sbar-t">9:41</span><span class="sbar-i">▪▪▪ ▮</span></div>
+<div class="tnav"><div class="tnav-back" onclick="back()">‹ Tilbake</div><div class="tnav-title">Innstillinger</div><div style="width:60px"></div></div>
+<div class="scroll"><div style="padding-bottom:40px">
+<div class="sh"><span class="sh-t">Husholdning</span></div>
+<div class="card"><div class="sgr"><div class="sgl">Type</div><div class="sgv">Bor alene · eier bolig</div></div><div class="sgr"><div class="sgl">Elbil</div><div class="sgv g">Tesla Model 3</div></div></div>
+<div class="sh"><span class="sh-t">Datakilder og sikkerhet</span></div>
+<div class="card">
+<div class="sgr"><div><div class="sgl">PSD2 / Neonomics</div><div class="sgs"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div class="sgv g">Tilkoblet</div></div>
+<div class="sgr"><div><div class="sgl">Gjeldsregisteret</div><div class="sgs"><span class="src-tag src-dok">Bekreftet · BankID</span></div></div><div class="sgv g">Tilkoblet</div></div>
+<div class="sgr"><div><div class="sgl">Kartverket · Hjemla</div><div class="sgs"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div class="sgv g">Tilkoblet</div></div>
+<div class="sgr"><div><div class="sgl">Statens vegvesen</div><div class="sgs"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div class="sgv g">Tilkoblet</div></div>
+<div class="sgr"><div><div class="sgl">Elhub · Norgespris.no</div><div class="sgs"><span class="src-tag src-auto">Automatisk oppdaget</span></div></div><div class="sgv g">Aktiv</div></div>
+<div class="sgr"><div><div class="sgl">Abonnement-mønster</div><div class="sgs"><span class="src-tag src-antatt">Antatt basert på mønster</span></div></div><div class="sgv o">Delvis</div></div>
+</div>
+<div class="sh"><span class="sh-t">Varsler</span></div>
+<div class="card"><div class="sgr"><div class="sgl">Nye anbefalinger</div><div class="tgl on" onclick="this.classList.toggle('on')"><div class="tk"></div></div></div><div class="sgr"><div class="sgl">Sparemål-påminnelser</div><div class="tgl on" onclick="this.classList.toggle('on')"><div class="tk"></div></div></div></div>
+<div class="sh"><span class="sh-t">Konto</span></div>
+<div class="card"><div class="sgr" style="cursor:pointer" onclick="showToast('Logget ut');tab('home')"><div class="sgl" style="color:var(--err)">Logg ut</div></div></div>
+<div style="padding:14px 18px;font-size:12px;color:var(--ink3);text-align:center;line-height:1.6">Superapp mottar ingen provisjon.<br>Din data deles aldri med tredjeparter.<br>Vi er alltid brukerens agent – ikke bankenes.</div>
+</div></div>
+</div>
+
+<!-- MODAL: LEGG TIL EIENDEL -->
+<div class="mbg" id="em" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="msh" onclick="event.stopPropagation()">
+<div class="mhandle"></div><div class="mt">Legg til eiendel</div>
+<div class="gt-grid"><div class="gt-item sel" onclick="selGt(this)"><div class="gt-ic">🏠</div><div class="gt-nm">Bolig</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🚗</div><div class="gt-nm">Bil</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🏕️</div><div class="gt-nm">Hytte</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">📈</div><div class="gt-nm">Aksjer</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">⛵</div><div class="gt-nm">Båt</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">⭐</div><div class="gt-nm">Annet</div></div></div>
+<input class="mi" placeholder="Navn eller beskrivelse"/><input class="mi" placeholder="Estimert verdi (kr)" type="number"/>
+<button class="btn btn-p" style="margin:4px 0 8px" onclick="showToast('Eiendel lagt til!');document.getElementById('em').classList.remove('show')">Legg til</button>
+<button class="btn btn-s" onclick="document.getElementById('em').classList.remove('show')">Avbryt</button>
+</div></div>
+
+<!-- MODAL: NYTT SPAREMÅL -->
+<div class="mbg" id="gm" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="msh" onclick="event.stopPropagation()">
+<div class="mhandle"></div><div class="mt">Nytt sparemål</div>
+<div class="gt-grid"><div class="gt-item sel" onclick="selGt(this)"><div class="gt-ic">✈️</div><div class="gt-nm">Reise</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🏠</div><div class="gt-nm">Bolig</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🚗</div><div class="gt-nm">Bil</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🛡️</div><div class="gt-nm">Buffer</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">🎓</div><div class="gt-nm">Utdanning</div></div><div class="gt-item" onclick="selGt(this)"><div class="gt-ic">⭐</div><div class="gt-nm">Annet</div></div></div>
+<input class="mi" placeholder="Navn på målet"/><input class="mi" placeholder="Målbeløp (kr)" type="number"/><input class="mi" placeholder="Månedlig sparing (kr)" type="number"/>
+<button class="btn btn-p" style="margin:4px 0 8px" onclick="showToast('Sparemål opprettet!');document.getElementById('gm').classList.remove('show')">Opprett sparemål</button>
+<button class="btn btn-s" onclick="document.getElementById('gm').classList.remove('show')">Avbryt</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+</div>
+<div class="ver">Superapp v16 · Epistemisk</div>
+
+<script>
+const hist=[];let cur='home';
+function go(id){hist.push(cur);sh(id);}
+function back(){if(hist.length)sh(hist.pop());else sh('home');}
+function sh(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));const el=document.getElementById(id);if(el)el.classList.add('on');cur=id;}
+function tab(t){hist.length=0;sh(t);}
+
+let vippsModalTxId=null;
+function openVippsModal(txId,name,amt,date){
+  vippsModalTxId=txId;
+  document.getElementById('modal-name').textContent=name;
+  document.getElementById('modal-amt').textContent='−'+amt;
+  document.getElementById('modal-date').textContent=date;
+  // Reset kategori-valg
+  document.querySelectorAll('#cat-grid button').forEach(b=>{
+    b.style.borderColor='var(--bd)';
+    b.style.background='var(--sf2)';
+  });
+  const m=document.getElementById('vipps-modal');
+  m.style.display='flex';
+}
+function closeVippsModal(){
+  document.getElementById('vipps-modal').style.display='none';
+  vippsModalTxId=null;
+}
+function setVippsCat(btn,catName,emoji){
+  // Marker valgt knapp
+  document.querySelectorAll('#cat-grid button').forEach(b=>{
+    b.style.borderColor='var(--bd)';b.style.background='var(--sf2)';
+  });
+  btn.style.borderColor='var(--accent)';
+  btn.style.background='var(--ok-bg)';
+  // Lagre etter liten pause (visuelt feedback)
+  setTimeout(()=>{
+    if(vippsModalTxId){
+      const row=document.getElementById(vippsModalTxId);
+      if(row){
+        const lbl=row.querySelector('.vtx-cat-label');
+        if(lbl){
+          lbl.textContent=emoji+' '+catName;
+          lbl.style.color='var(--ok)';
+          lbl.style.fontWeight='600';
+        }
+        // Fjern "Kategorisr →" pilen
+        const arrow=row.querySelector('[style*="Kategorisr"]');
+        if(arrow) arrow.textContent='✓ Kategorisert';
+        if(arrow) arrow.style.color='var(--ok)';
+      }
+    }
+    closeVippsModal();
+    showToast(emoji+' Kategorisert som '+catName);
+  },400);
+}
+
+const budTxHelse=[
+  {d:'11. april',n:'Vitusapotek Storo',c:'#007DC5',s:'VI',amt:'−312 kr'},
+  {d:'6. april',n:'Legekontoret sentrum',c:'#3A6B9F',s:'LE',amt:'−248 kr'},
+  {d:'2. april',n:'Apotek1 Grünerløkka',c:'#E4001B',s:'AP',amt:'−80 kr'}
+];
+const budTxKlar=[
+  {d:'9. april',n:'H&M Karl Johan',c:'#E50000',s:'HM',amt:'−590 kr'},
+  {d:'4. april',n:'Zalando',c:'#FF6B00',s:'ZA',amt:'−300 kr'}
+];
+const budTxHobby=[
+  {d:'13. april',n:'Spaceworld Klatring',c:'#2C3E50',s:'SP',amt:'−390 kr'},
+  {d:'7. april',n:'Steam',c:'#1B2838',s:'ST',amt:'−450 kr'},
+  {d:'3. april',n:'Cinemateket',c:'#8B1A1A',s:'CI',amt:'−150 kr'},
+  {d:'1. april',n:'Gymlibrary Bokhandel',c:'#4A4A4A',s:'GY',amt:'−250 kr'}
+];
+const budTxVipps=[
+  {d:'12. april',n:'Vipps til Ola N.',c:'#FF5B24',s:'VP',amt:'−500 kr'},
+  {d:'10. april',n:'Vipps til Sara L.',c:'#FF5B24',s:'VP',amt:'−800 kr'},
+  {d:'8. april',n:'Ukjent · *4512',c:'#888',s:'?',amt:'−463 kr'},
+  {d:'5. april',n:'Vipps til Petter H.',c:'#FF5B24',s:'VP',amt:'−700 kr'},
+  {d:'3. april',n:'Ukjent · *3309',c:'#888',s:'?',amt:'−350 kr'},
+  {d:'1. april',n:'Vipps til Emma T.',c:'#FF5B24',s:'VP',amt:'−350 kr'}
+];
+
+function openBudGen(title,amt,barPct,barColor,txData){
+  document.getElementById('bud-gen-title').textContent=title;
+  document.getElementById('bud-gen-amt').textContent=amt;
+  const bar=document.getElementById('bud-gen-bar');
+  bar.style.width=barPct+'%';
+  bar.style.background=barColor==='warn'?'#EF9F27':barColor==='bad'?'#E24B4A':'var(--accent-mid)';
+  let html='';
+  let lastDate='';
+  txData.forEach(tx=>{
+    if(tx.d!==lastDate){
+      if(lastDate!=='')html+='';
+      html+=`<div style="padding:8px 18px;background:var(--sf3);border-bottom:.5px solid var(--bd);${lastDate?'border-top:.5px solid var(--bd)':''}"><span style="font-size:11px;font-weight:600;color:var(--ink3)">${tx.d}</span></div>`;
+      lastDate=tx.d;
+    }
+    html+=`<div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:.5px solid var(--bd)"><div style="width:40px;height:40px;border-radius:10px;background:${tx.c};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:11px;font-weight:800;color:#fff">${tx.s}</span></div><div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ink)">${tx.n}</div><div style="font-size:12px;color:var(--ink3);margin-top:1px">${tx.d} · kortbetaling</div></div><div style="font-size:15px;font-weight:600;color:var(--ink)">${tx.amt}</div></div>`;
+  });
+  document.getElementById('bud-gen-list').innerHTML=html;
+  go('bud-generisk');
+}
+
+function setBudPeriod(p){
+  const mnd=document.getElementById('bud-mnd-view');
+  const aar=document.getElementById('bud-aar-view');
+  const tm=document.getElementById('tog-mnd');
+  const ta=document.getElementById('tog-aar');
+  if(p==='mnd'){
+    mnd.style.display='';aar.style.display='none';
+    tm.style.background='var(--sf)';tm.style.color='var(--ink)';tm.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
+    ta.style.background='transparent';ta.style.color='var(--ink3)';ta.style.boxShadow='none';
+  } else {
+    mnd.style.display='none';aar.style.display='';
+    ta.style.background='var(--sf)';ta.style.color='var(--ink)';ta.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
+    tm.style.background='transparent';tm.style.color='var(--ink3)';tm.style.boxShadow='none';
+  }
+}
+
+function setGraph(key){
+  ['spart','igjen','pot'].forEach(k=>{
+    const g=document.getElementById('g-'+k);
+    if(g)g.style.display=k===key?'':'none';
+    const b=document.getElementById('gt-'+k);
+    if(b){if(k===key){b.style.background='#fff';b.style.color='var(--accent-dk)';b.style.borderColor='#fff';}else{b.style.background='transparent';b.style.color='rgba(255,255,255,.65)';b.style.borderColor='rgba(255,255,255,.3)';}}
+  });
+}
+
+let loanScenario='ab';
+function toggleLoanScenario(){
+  loanScenario=loanScenario==='ab'?'b':'ab';
+  const ab=document.getElementById('lan-scenario-ab');
+  const b=document.getElementById('lan-scenario-b');
+  const recAb=document.getElementById('top-rec-ab');
+  const recB=document.getElementById('top-rec-b');
+  if(loanScenario==='ab'){
+    if(ab)ab.style.display='';if(b)b.style.display='none';
+    if(recAb)recAb.style.display='';if(recB)recB.style.display='none';
+    document.querySelectorAll('[onclick="toggleLoanScenario()"]').forEach(el=>el.textContent='Demo: bytt til bruker med bare boliglån');
+  } else {
+    if(ab)ab.style.display='none';if(b)b.style.display='';
+    if(recAb)recAb.style.display='none';if(recB)recB.style.display='';
+    document.querySelectorAll('[onclick="toggleLoanScenario()"]').forEach(el=>el.textContent='Demo: bytt til bruker med forbrukslån + boliglån');
+  }
+  showToast('Scenario byttet – se hjemskjerm og Lån og gjeld');
+}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);}
+function selGt(el){el.closest('.gt-grid').querySelectorAll('.gt-item').forEach(g=>g.classList.remove('sel'));el.classList.add('sel');}
+function toggleAb(id){const p=document.getElementById(id+'-p');p.style.display=p.style.display==='block'?'none':'block';}
+function selQ(el){el.closest('.qopts').querySelectorAll('.qopt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
+const mres={
+lav:`<div class="choice feat" style="margin-bottom:8px"><div class="ch-top"><span class="ch-title">Chilimobil 8 GB</span><span class="ch-badge">Lavest pris i klassen</span></div><div class="ch-desc">Telia-nett</div><div class="ch-save">169 kr/mnd · sparer 380 kr/mnd</div></div><div class="choice"><div class="ch-top"><span class="ch-title">Talkmore 6 GB</span></div><div class="ch-save" style="color:var(--warn)">159 kr/mnd</div></div>`,
+mid:`<div class="choice feat" style="margin-bottom:8px"><div class="ch-top"><span class="ch-title">Chilimobil 15 GB</span><span class="ch-badge">Lavest pris i klassen</span></div><div class="ch-desc">Telia-nett · EU-roaming</div><div class="ch-save">229 kr/mnd · sparer 320 kr/mnd</div></div><div class="choice"><div class="ch-top"><span class="ch-title">Onecall 20 GB</span></div><div class="ch-desc">Telenor-nett</div><div class="ch-save" style="color:var(--warn)">249 kr/mnd · sparer 300 kr/mnd</div></div>`,
+hoy:`<div class="choice feat" style="margin-bottom:8px"><div class="ch-top"><span class="ch-title">Onecall 50 GB</span><span class="ch-badge">Lavest pris i klassen</span></div><div class="ch-save">299 kr/mnd · sparer 250 kr/mnd</div></div><div class="choice"><div class="ch-top"><span class="ch-title">Talkmore 40 GB</span></div><div class="ch-save" style="color:var(--warn)">329 kr/mnd</div></div>`,
+ub:`<div class="choice feat" style="margin-bottom:8px"><div class="ch-top"><span class="ch-title">Ice Ubegrenset</span><span class="ch-badge">Lavest pris i klassen</span></div><div class="ch-save">399 kr/mnd · sparer 150 kr/mnd</div></div><div class="choice"><div class="ch-top"><span class="ch-title">Chilimobil Fri</span></div><div class="ch-save" style="color:var(--warn)">449 kr/mnd</div></div>`
+};
+function filtM(btn,lvl){document.querySelectorAll('.ftab').forEach(b=>{b.classList.remove('on');b.classList.add('off');});btn.classList.remove('off');btn.classList.add('on');document.getElementById('mob-res').innerHTML=mres[lvl];}
+
+const agentsvar={
+'Hva er nettoformuen min?':{txt:'Fra din kundemodell akkurat nå:\n\nEiendeler:\n· Bolig Storgata 12: 4 200 000 kr (Hjemla)\n· Tesla Model 3 2021: 295 000 kr (Statens vegvesen)\n· Bankinnskudd DNB: 1 380 000 kr (PSD2)\n\nGjeld:\n· Boliglån DNB 5,8%: 2 270 000 kr\n· Forbrukslån Santander: 42 000 kr\n· Kredittkort: 3 200 kr\n\nNetto: 3 559 800 kr ↑ 340 000 siste år',src:'Gjeldsregisteret · PSD2 · Hjemla · Statens vegvesen'},
+'Hva bør jeg gjøre først?':{txt:'Basert på din faktiske situasjon – rangert etter effekt per krone:\n\n1. Samlelån (2 050 kr/mnd) – høy effekt, bekreftet data, lav innsats\n2. Si opp Gjensidige reise (290 kr/mnd) – dokumentert, kan gjøres i dag\n3. Abonnementer (568 kr/mnd) – antatt basert på mønster, bekreft selv\n\nStrøm og mobil er allerede i prosess eller lett å gjøre.',src:'Systemmodellen · alle datakilder'},
+'Bør jeg selge bilen?':{txt:'Tesla Model 3 2021 analysert:\n\n· Nåverdi: 295 000 kr\n· Verdfall: ca. 25 000 kr/år\n· Kjørt: 62 000 km\n\nHvis du bruker kollektivt:\nSpart verdfall 25 000 + forsikring 7 000 – Ruter 3 400 = ca. 28 600 kr/år\n\nDatagrunnlag: middels. Jeg vet ikke om du er avhengig av bil på jobb.',src:'Statens vegvesen · Finn.no markedsdata'},
+'Hvilket kredittkort passer meg?':{txt:'Basert på ditt forbruksmønster:\n\n· Dagligvarer: 6 500 kr/mnd\n· Restaurant: 2 367 kr/mnd\n\nNorwegian Reward eller Coop MasterCard passer best.\n\n⚠ Råd: Refinansier boliglånet først. Et nytt kredittkort kan skape binding til en bank som ikke gir deg det beste lånet.',src:'PSD2-transaksjonsanalyse · nøytral vurdering'},
+'Når når jeg Japan-tur-målet?':{txt:'Japan-tur 50 000 kr – prognose:\n\n· Nåværende saldo: 34 200 kr (68%)\n· Gjenstår: 15 800 kr\n· Med nåværende sparing: Oktober 2026\n· Med samlelån-besparelse satt av: Juni 2026\n· Med alle besparelser: Mai 2026\n\nDatagrunnlag: bekreftet via sparekonto-transaksjoner.',src:'PSD2 · Sparekonto-historikk'},
+'Hva vet vi ikke sikkert?':{txt:'Her er det vi er usikre på:\n\n🟡 Antatt (ikke bekreftet):\n· Netflix og Evo-ubruk – vi ser mønster, ikke logg\n· TV-boks-bruk – ingen tilgang til Telenor-logg\n· Abonnementsliste kan mangle tjenester vi ikke fanger\n\n🔴 Ikke kartlagt:\n· Pensjonssaldo\n· Eventuelle andre lån utenfor Gjeldsregisteret\n· Samboers økonomi hvis relevant\n\n✅ Bekreftet:\n· All gjeld (Gjeldsregisteret + PSD2)\n· Boligverdi (Hjemla + Kartverket)\n· Strømforbruk (Elhub)\n· Bilinformasjon (Statens vegvesen)',src:'Systemmodellen · epistemisk transparens'}
+};
+function ask(q){const box=document.getElementById('cmsgs');box.innerHTML+=`<div class="msg-u"><div class="bbl-u">${q}</div></div>`;box.innerHTML+=`<div class="msg-a"><div class="bbl-a" id="t${Date.now()}">Henter fra kundemodellen…</div></div>`;box.scrollTop=box.scrollHeight;const id=box.lastElementChild.firstElementChild.id;setTimeout(()=>{const el=document.getElementById(id);if(!el)return;const s=agentsvar[q]||{txt:'Spørsmålet er registrert. I en ekte versjon henter jeg dette fra din oppdaterte kundemodell.',src:'Kundemodell'};el.innerHTML=s.txt.replace(/\n/g,'<br>')+'<div class="chat-src" style="margin-top:8px">Kilde: '+s.src+'</div>';box.scrollTop=box.scrollHeight;},900);}
+function sendC(){const i=document.getElementById('cinp');const q=i.value.trim();if(!q)return;i.value='';ask(q);}
+</script>
+</body>
+</html>

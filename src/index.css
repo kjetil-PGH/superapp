@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --font-size-xs: 0.6875rem;
+  --font-size-xs--line-height: 1rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-sm--line-height: 1.25rem;
+  --font-size-base: 0.9375rem;
+  --font-size-base--line-height: 1.375rem;
+  --font-size-lg: 1.125rem;
+  --font-size-lg--line-height: 1.5rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xl--line-height: 1.625rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-2xl--line-height: 2rem;
+  --font-size-3xl: 2.75rem;
+  --font-size-3xl--line-height: 1;
+
+  --color-accent: #1565C0;
+  --color-accent-light: #E3F2FD;
+  --color-accent-mid: #1E88E5;
+  --color-accent-dark: #0D47A1;
+
+  --color-ink: #1A1A1A;
+  --color-ink-2: #4A4A4A;
+  --color-ink-3: #8A8A8A;
+  --color-ink-4: #BFBFBF;
+
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F5F2EF;
+  --color-surface-3: #EDEAE7;
+
+  --color-ok: #2E7D32;
+  --color-ok-bg: #E8F5E9;
+
+  --color-warn: #E65100;
+  --color-warn-bg: #FFF3E0;
+
+  --color-err: #C62828;
+  --color-err-bg: #FDEAEA;
+
+
+  --color-border: rgba(26, 26, 26, 0.06);
+  --color-border-m: rgba(26, 26, 26, 0.12);
+
+  --radius-1: 12px;
+  --radius-2: 20px;
+  --radius-3: 24px;
+  --radius-4: 32px;
+
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
