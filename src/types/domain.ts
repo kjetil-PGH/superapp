@@ -39,6 +39,8 @@ export interface Insight {
   potentialMonthlySaving?: number
   potentialYearlySaving?: number
   relatedExpenseId?: string
+  merchantName?: string
+  merchantNames?: string[]
 }
 
 export interface CategoryBreakdown {

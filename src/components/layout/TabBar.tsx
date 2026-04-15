@@ -3,24 +3,58 @@ import { NavLink } from "react-router-dom";
 const tabs = [
   {
     to: "/",
-    label: "Oversikt",
+    label: "Hjem",
     icon: (active: boolean) => (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10.5z"
+          stroke={active ? "currentColor" : "#BFBFBF"}
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.12 : 0}
+        />
+        <rect
+          x="9"
+          y="14"
+          width="6"
+          height="7"
+          rx="1"
+          stroke={active ? "currentColor" : "#BFBFBF"}
+          strokeWidth="1.6"
+        />
+      </svg>
+    ),
+  },
+  {
+    to: "/budget",
+    label: "Budsjett",
+    icon: (active: boolean) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <rect
           x="3"
-          y="10"
-          width="7"
-          height="9"
-          rx="1.5"
+          y="14"
+          width="4"
+          height="7"
+          rx="1"
           stroke={active ? "currentColor" : "#BFBFBF"}
           strokeWidth="1.6"
         />
         <rect
-          x="12"
+          x="10"
+          y="9"
+          width="4"
+          height="12"
+          rx="1"
+          stroke={active ? "currentColor" : "#BFBFBF"}
+          strokeWidth="1.6"
+        />
+        <rect
+          x="17"
           y="3"
-          width="7"
-          height="16"
-          rx="1.5"
+          width="4"
+          height="18"
+          rx="1"
           stroke={active ? "currentColor" : "#BFBFBF"}
           strokeWidth="1.6"
         />
@@ -28,37 +62,42 @@ const tabs = [
     ),
   },
   {
-    to: "/recurring",
-    label: "Faste",
+    to: "/economy",
+    label: "Økonomi",
     icon: (active: boolean) => (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path
-          d="M4 6h14M4 11h10M4 16h7"
-          stroke={active ? "currentColor" : "#BFBFBF"}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    to: "/insights",
-    label: "Innsikt",
-    icon: (active: boolean) => (
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <circle
-          cx="11"
-          cy="11"
-          r="8"
+          cx="12"
+          cy="12"
+          r="9"
           stroke={active ? "currentColor" : "#BFBFBF"}
           strokeWidth="1.6"
         />
         <path
-          d="M11 7v4l3 2"
+          d="M12 7v2m0 6v2m-3-7h1.5a1.5 1.5 0 0 1 0 3H11a1.5 1.5 0 0 0 0 3h1.5M12 7h-1.5M12 7h1.5m-3 10h3"
           stroke={active ? "currentColor" : "#BFBFBF"}
-          strokeWidth="1.6"
+          strokeWidth="1.3"
           strokeLinecap="round"
         />
+      </svg>
+    ),
+  },
+  {
+    to: "/ask",
+    label: "Spør",
+    icon: (active: boolean) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M21 12a9 9 0 0 1-9 9 9.1 9.1 0 0 1-4.25-1.05L3 21l1.05-4.75A9.1 9.1 0 0 1 3 12a9 9 0 0 1 18 0z"
+          stroke={active ? "currentColor" : "#BFBFBF"}
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          fill={active ? "currentColor" : "none"}
+          fillOpacity={active ? 0.12 : 0}
+        />
+        <circle cx="8" cy="12" r="1" fill={active ? "currentColor" : "#BFBFBF"} />
+        <circle cx="12" cy="12" r="1" fill={active ? "currentColor" : "#BFBFBF"} />
+        <circle cx="16" cy="12" r="1" fill={active ? "currentColor" : "#BFBFBF"} />
       </svg>
     ),
   },
@@ -85,14 +124,14 @@ const tabs = [
 
 export function TabBar() {
   return (
-    <nav className="flex items-center justify-around bg-surface/95 backdrop-blur-md border-t border-border py-4 flex-shrink-0">
+    <nav className="flex items-center justify-around bg-surface/95 backdrop-blur-md border-t border-border py-3 flex-shrink-0">
       {tabs.map(({ to, label, icon }) => (
         <NavLink
           key={to}
           to={to}
           end={to === "/"}
           className={({ isActive }) =>
-            `flex flex-col items-center gap-1 text-xs font-semibold transition-colors ${isActive ? "text-accent" : "text-ink-4"}`
+            `flex flex-col items-center gap-0.5 text-[10px] font-semibold transition-colors ${isActive ? "text-accent" : "text-ink-4"}`
           }
         >
           {({ isActive }) => (

@@ -1,29 +1,30 @@
-import { useNavigate } from 'react-router-dom'
-import type { Insight } from '@/types/domain'
-import { formatNOK } from '@/lib/format'
+import { useNavigate } from "react-router-dom";
+import type { Insight } from "@/types/domain";
+import { formatNOK } from "@/lib/format";
+import { MerchantLogo, MerchantLogoGroup } from "@/components/ui/MerchantLogo";
 
 interface RecommendationCardProps {
-  insight: Insight
+  insight: Insight;
 }
 
 export function RecommendationCard({ insight }: RecommendationCardProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const severityStyles = {
-    critical: { cat: 'text-accent', border: 'border-accent/15' },
-    warning: { cat: 'text-warn', border: 'border-warn/15' },
-    info: { cat: 'text-ink-3', border: 'border-transparent' },
-  }
+    critical: { cat: "text-accent", border: "border-accent/15" },
+    warning: { cat: "text-warn", border: "border-warn/15" },
+    info: { cat: "text-ink-3", border: "border-transparent" },
+  };
 
-  const s = severityStyles[insight.severity]
+  const s = severityStyles[insight.severity];
 
   const handleClick = () => {
     if (insight.relatedExpenseId) {
-      navigate(`/recurring/${insight.relatedExpenseId}`)
+      navigate(`/recurring/${insight.relatedExpenseId}`);
     } else {
-      navigate('/insights')
+      navigate("/insights");
     }
-  }
+  };
 
   return (
     <div
@@ -31,11 +32,25 @@ export function RecommendationCard({ insight }: RecommendationCardProps) {
       onClick={handleClick}
     >
       <div className="p-4 pb-3">
-        <div className={`text-xs font-bold uppercase tracking-wider mb-1.5 ${s.cat}`}>
-          {insight.type === 'price_increase' ? 'Prisøkning' :
-            insight.type === 'saving_opportunity' ? 'Sparemulighet' :
-            insight.type === 'unused_subscription' ? 'Mulig ubrukt' :
-            'Innsikt'}
+        <div className="flex items-center gap-2.5 mb-2">
+          {insight.merchantNames && insight.merchantNames.length > 1 ? (
+            <MerchantLogoGroup names={insight.merchantNames} size={28} />
+          ) : (
+            insight.merchantName && (
+              <MerchantLogo name={insight.merchantName} size={28} />
+            )
+          )}
+          <div
+            className={`text-xs font-bold uppercase tracking-wider ${s.cat}`}
+          >
+            {insight.type === "price_increase"
+              ? "Prisøkning"
+              : insight.type === "saving_opportunity"
+                ? "Sparemulighet"
+                : insight.type === "unused_subscription"
+                  ? "Mulig ubrukt"
+                  : "Innsikt"}
+          </div>
         </div>
         {insight.potentialMonthlySaving && (
           <div className="text-2xl font-extrabold text-ink tracking-tight leading-none mb-1">
@@ -51,5 +66,5 @@ export function RecommendationCard({ insight }: RecommendationCardProps) {
         <span className="text-sm font-bold text-accent">Se detaljer →</span>
       </div>
     </div>
-  )
+  );
 }

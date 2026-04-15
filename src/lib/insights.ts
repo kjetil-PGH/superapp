@@ -20,6 +20,7 @@ function generateInsights(expenses: RecurringExpense[]): Insight[] {
           potentialMonthlySaving: increase,
           potentialYearlySaving: increase * 12,
           relatedExpenseId: exp.id,
+          merchantName: exp.merchant,
         })
       }
     }
@@ -37,6 +38,7 @@ function generateInsights(expenses: RecurringExpense[]): Insight[] {
       severity: totalStreaming > 500 ? 'warning' : 'info',
       potentialMonthlySaving: Math.round(totalStreaming * 0.3),
       potentialYearlySaving: Math.round(totalStreaming * 0.3 * 12),
+      merchantNames: streamingExpenses.map(e => e.merchant),
     })
   }
 
@@ -52,6 +54,7 @@ function generateInsights(expenses: RecurringExpense[]): Insight[] {
       potentialMonthlySaving: exp.monthlyAmount,
       potentialYearlySaving: exp.yearlyAmount,
       relatedExpenseId: exp.id,
+      merchantName: exp.merchant,
     })
   }
 

@@ -10,7 +10,7 @@ const domainMap: Record<string, string> = {
   'Google One': 'google.com',
   'HBO Max': 'hbomax.com',
   'Disney+': 'disneyplus.com',
-  'Viaplay': 'viaplay.com',
+  'Viaplay': 'viaplay.no',
   'Adobe': 'adobe.com',
   'ChatGPT': 'openai.com',
   'Telia': 'telia.no',
@@ -29,7 +29,7 @@ const domainMap: Record<string, string> = {
   'Sbanken': 'sbanken.no',
   'Vipps': 'vipps.no',
   'Finn': 'finn.no',
-  'Rema 1000': 'rema.no',
+  'Rema 1000': 'rema1000.no',
   'Kiwi': 'kiwi.no',
   'Coop': 'coop.no',
   'Norgesgruppen': 'norgesgruppen.no',
@@ -144,5 +144,62 @@ export function TransactionLogo({ name, isDebit, size = 36, className = '' }: Tr
       onError={() => setFailed(true)}
       loading="lazy"
     />
+  )
+}
+
+interface MerchantLogoGroupProps {
+  names: string[]
+  size?: number
+  className?: string
+}
+
+export function MerchantLogoGroup({ names, size = 40, className = '' }: MerchantLogoGroupProps) {
+  const show = names.slice(0, 4)
+  const itemSize = show.length <= 2 ? Math.round(size * 0.65) : Math.round(size * 0.52)
+
+  const positions: Record<number, { top: number; left: number }[]> = {
+    1: [{ top: 0, left: 0 }],
+    2: [
+      { top: 0, left: 0 },
+      { top: size - itemSize, left: size - itemSize },
+    ],
+    3: [
+      { top: 0, left: Math.round((size - itemSize) / 2) },
+      { top: size - itemSize, left: 0 },
+      { top: size - itemSize, left: size - itemSize },
+    ],
+    4: [
+      { top: 0, left: 0 },
+      { top: 0, left: size - itemSize },
+      { top: size - itemSize, left: 0 },
+      { top: size - itemSize, left: size - itemSize },
+    ],
+  }
+
+  const pos = positions[show.length] ?? positions[4]
+
+  return (
+    <div
+      className={`relative shrink-0 ${className}`}
+      style={{ width: size, height: size }}
+    >
+      {show.map((name, i) => (
+        <div
+          key={name}
+          className="absolute"
+          style={{
+            top: pos[i].top,
+            left: pos[i].left,
+            zIndex: show.length - i,
+          }}
+        >
+          <MerchantLogo
+            name={name}
+            size={itemSize}
+            className="ring-2 ring-white"
+          />
+        </div>
+      ))}
+    </div>
   )
 }
